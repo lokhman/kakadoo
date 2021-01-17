@@ -1,0 +1,595 @@
+{{ define "styles" }}
+    <style>
+        main {
+            width: inherit;
+            height: inherit;
+        }
+        .form-label-group {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+        .form-label-group > input,
+        .form-label-group > label {
+            height: 3.125rem;
+            padding: .75rem;
+        }
+        .form-label-group > label {
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: block;
+            width: 100%;
+            margin-bottom: 0;
+            line-height: 1.5;
+            color: #495057;
+            pointer-events: none;
+            cursor: text;
+            border: 1px solid transparent;
+            border-radius: .25rem;
+            transition: all .1s ease-in-out;
+        }
+        .form-label-group input::-webkit-input-placeholder,
+        .form-label-group input:-ms-input-placeholder,
+        .form-label-group input::-ms-input-placeholder,
+        .form-label-group input::-moz-placeholder,
+        .form-label-group input::placeholder {
+            color: transparent;
+        }
+        .form-label-group input:not(:placeholder-shown) {
+            padding-top: 1.25rem;
+            padding-bottom: .25rem;
+        }
+        .form-label-group input:not(:placeholder-shown) ~ label {
+            padding-top: .25rem;
+            padding-bottom: .25rem;
+            font-size: 12px;
+            color: #777;
+        }
+        .btn-xlg {
+            padding: 1.5rem 1rem;
+            font-size: 1.25rem;
+            line-height: 1.5;
+            border-radius: .3rem;
+        }
+        #toasts {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        .toast {
+            min-width: 350px;
+        }
+        .toast-header img {
+            width: 20px;
+        }
+        #form-enter {
+            max-width: 286px;
+            padding: 15px;
+            margin: auto;
+        }
+        #form-enter img {
+            width: 100%;
+            height: auto;
+        }
+        #gp-task-answers button {
+            color: #fff;
+            min-height: 120px;
+            transition: transform 120ms ease-out;
+        }
+        #gp-task-answers button.js-clicked,
+        #gp-task-answers button.js-correct,
+        #gp-task-answers button:not(.clicked):hover {
+            transform: scale(1.01);
+        }
+        #gp-task-answers > :nth-child(1) button {
+            background-color: #51c0bf;
+        }
+        #gp-task-answers > :nth-child(2) button {
+            background-color: #9fa3e3;
+        }
+        #gp-task-answers > :nth-child(3) button {
+            background-color: #59add0;
+        }
+        #gp-task-answers > :nth-child(4) button {
+            background-color: #7095e1;
+        }
+        #gp-task-answers button.js-clicked,
+        #gp-task-answers button.js-correct {
+            opacity: 1;
+        }
+        #gp-task-answers button.js-correct {
+            background-color: #28a745;
+        }
+        #gp-task-answers button.js-incorrect {
+            background-color: #dc3545;
+        }
+        #gp-task-answers button.js-correct::before,
+        #gp-task-answers button.js-incorrect::before
+        {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        #gp-task-answers button.js-correct::before {
+            content: "\2713";
+        }
+        #gp-task-answers button.js-incorrect::before {
+            content: "\2715";
+        }
+        #scores {
+            height: inherit;
+            align-content: center;
+        }
+        #podium {
+            align-items: flex-end;
+        }
+        #podium > div {
+            overflow: hidden;
+            padding-top: 12px;
+            text-overflow: ellipsis;
+            letter-spacing: 0.1rem;
+            font-weight: bold;
+            transition: color 1s ease-in, height 1s ease-in;
+        }
+        #podium.init > div {
+            color: rgba(255, 255, 255, 0);
+            height: 50px;
+        }
+        #podium > :nth-child(1) {
+            height: 100px;
+        }
+        #podium > :nth-child(2) {
+            height: 125px;
+        }
+        #podium > :nth-child(3) {
+            height: 75px;
+        }
+        .fw::before, .fw::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            box-shadow: 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff,
+                0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff,
+                0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff,
+                0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff,
+                0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff,
+                0 0 #fff, 0 0 #fff;
+            animation: 1s bang ease-out infinite backwards, 1s gravity ease-in infinite backwards,
+                5s position linear infinite backwards;
+        }
+        .fw::after {
+            animation-delay: 1.25s, 1.25s, 1.25s;
+            animation-duration: 1.25s, 1.25s, 6.25s;
+        }
+        @keyframes bang {
+            to {
+                box-shadow: -33px -327.6666666667px #00ffaa, 78px -373.6666666667px #ff4000,
+                    151px -362.6666666667px #ffbf00, -234px -116.6666666667px #00ff99, -110px -63.6666666667px #00b7ff,
+                    108px -280.6666666667px #3700ff, -238px -78.6666666667px #0051ff, 146px 72.3333333333px #59ff00,
+                    76px -184.6666666667px #ff3700, -218px 56.3333333333px #ee00ff, 137px -161.6666666667px #004dff,
+                    -142px -125.6666666667px #09ff00, -85px -165.6666666667px #0040ff, 113px 77.3333333333px #ff006f,
+                    -169px -77.6666666667px #1100ff, 84px -227.6666666667px #73ff00, -140px -398.6666666667px #0066ff,
+                    182px 50.3333333333px #ff0033, 145px 45.3333333333px #0055ff, 93px -383.6666666667px #ffae00,
+                    -249px -381.6666666667px #00ffae, -26px -336.6666666667px #26ff00, -8px 46.3333333333px #0062ff,
+                    -211px -176.6666666667px #fff700, 190px 61.3333333333px #00bbff, 33px -170.6666666667px #d000ff,
+                    4px -67.6666666667px #00ff6f, -33px 70.3333333333px #00ff09, 136px -142.6666666667px #00ff1e,
+                    -186px -71.6666666667px #00ff6f, -163px -245.6666666667px #bb00ff, -52px -350.6666666667px #fbff00,
+                    81px -134.6666666667px #e600ff, -43px -76.6666666667px #00f7ff, -175px -262.6666666667px #00ff84,
+                    -44px -409.6666666667px #00ffe1, -103px -289.6666666667px #a6ff00, -169px 57.3333333333px #ff0066,
+                    2px -263.6666666667px #ff00bb, 140px -161.6666666667px #ffdd00, -95px -166.6666666667px #0088ff,
+                    -133px -19.6666666667px #00ffaa, -187px -51.6666666667px #009dff, -123px -333.6666666667px #ff009d,
+                    180px -5.6666666667px #33ff00, 19px -288.6666666667px #00f7ff, -9px -360.6666666667px #00b7ff,
+                    -195px -80.6666666667px #51ff00, -218px -408.6666666667px #ff00aa, 56px -352.6666666667px #0026ff,
+                    -154px -391.6666666667px #ff001e;
+            }
+        }
+        @keyframes gravity {
+            to {
+                transform: translateY(200px);
+                opacity: 0;
+            }
+        }
+        @keyframes position {
+            0%, 19.9% {
+                margin-top: 10%;
+                margin-left: 40%;
+            }
+            20%, 39.9% {
+                margin-top: 40%;
+                margin-left: 30%;
+            }
+            40%, 59.9% {
+                margin-top: 20%;
+                margin-left: 70%;
+            }
+            60%, 79.9% {
+                margin-top: 30%;
+                margin-left: 20%;
+            }
+            80%, 99.9% {
+                margin-top: 30%;
+                margin-left: 80%;
+            }
+        }
+    </style>
+{{ end }}
+
+{{ define "content" }}
+    <main></main>
+    <div id="toasts"></div>
+{{ end }}
+
+{{ define "scripts" }}
+    <script type="text/html" id="tpl-toast">
+        <div class="toast" data-delay="5000">
+            <div class="toast-header">
+                <img src="/static/android-chrome-192x192.png" class="rounded mr-2" alt="">
+                <strong class="mr-auto">Kakadoo</strong>
+                <button type="button" class="ml-2 mb-1 close" data-dismiss="toast">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="toast-body" data-tpl-key="body"></div>
+        </div>
+    </script>
+
+    <script type="text/html" id="tpl-enter">
+        <div style="display: flex; height: inherit; align-items: center">
+            <form action="{{ .wireURL }}" id="form-enter">
+                <div class="text-center mb-4">
+                    <img class="mb-4" src="/static/android-chrome-512x512.png" alt="">
+                    <h1 class="h4 mb-3 font-weight-normal">{{ .title }}</h1>
+                </div>
+                <div class="form-label-group">
+                    <input type="text" class="form-control" id="form-enter-player" name="player"
+                           placeholder="Enter your name" maxlength="32" required autofocus autocomplete="off">
+                    <label for="form-enter-player">Enter your name</label>
+                </div>
+                <button class="btn btn-lg btn-dark btn-block" type="submit" disabled>Go!</button>
+            </form>
+        </div>
+    </script>
+
+    <script type="text/html" id="tpl-gameplay">
+        <div class="row" style="height: inherit">
+            <div class="col-sm-8 col-md-9 col-lg-10" id="gp-task"></div>
+            <div class="col-sm-4 col-md-3 col-lg-2" style="height: inherit">
+                <ul class="list-group" id="gp-leaderboard" style="height: inherit; overflow: auto"></ul>
+            </div>
+        </div>
+        <div id="gp-controls" hidden>
+            <button class="btn btn-success btn-sm" id="gp-controls-start">
+                <i class="bi bi-play-fill"></i> Start game
+            </button>
+            <button class="btn btn-danger btn-sm" id="gp-controls-finish" disabled>
+                <i class="bi bi-stop-fill"></i> Finish game
+            </button>
+            <button class="btn btn-primary btn-sm float-right" id="gp-controls-next" disabled>
+                <i class="bi bi-arrow-right-circle"></i> Next task
+            </button>
+        </div>
+    </script>
+
+    <script type="text/html" id="tpl-task">
+        <div class="jumbotron">
+            <p class="lead">
+                <span data-tpl-key="lead"></span>
+                <span class="badge badge-success" style="font-size: inherit" hidden>
+                    <span class="spinner-border spinner-border-sm" style="width: 1.25rem; height: 1.25rem"></span>
+                    <span id="gp-task-timer" data-tpl-key="timer"></span>
+                </span>
+            </p>
+            <h1 class="display-4" data-tpl-key="question"></h1>
+        </div>
+        <div class="row" id="gp-task-answers"></div>
+    </script>
+
+    <script type="text/html" id="tpl-task-answer">
+        <div class="col-6 mb-4" data-tpl-key="index" data-tpl-attr="data-index">
+            <button class="btn btn-block btn-xlg" data-tpl-key="answer"></button>
+        </div>
+    </script>
+
+    <script type="text/html" id="tpl-leaderboard-player">
+        <li class="list-group-item d-flex justify-content-between align-items-center"
+            data-tpl-key='["name", "score"]' data-tpl-attr='["data-name", "data-score"]'>
+            <span data-tpl-key="name" style="overflow: hidden; text-overflow: ellipsis"></span>
+            <span class="badge badge-pill" data-tpl-key="score"></span>
+        </li>
+    </script>
+
+    <script type="text/html" id="tpl-scores">
+        <div class="row text-center justify-content-center" id="scores">
+            <div class="col-md-8 col-lg-4 text-white">
+                <h1 class="display-4 mb-5">Thanks for playing!</h1>
+                <div class="row init" id="podium">
+                    <div class="col-4 bg-warning" data-tpl-key="second"></div>
+                    <div class="col-4 bg-success" data-tpl-key="first"></div>
+                    <div class="col-4 bg-danger" data-tpl-key="third">Alex L</div>
+                </div>
+                <p class="lead mt-4">
+                    You scored <span data-tpl-key="points">23433</span> points!<br>
+                    <small data-tpl-key="place"></small>
+                </p>
+            </div>
+        </div>
+        <div class="fw"></div>
+    </script>
+
+    <script>
+        (function($) {
+            $.fn.extend({
+                template: function(id, context = {}, callback = null, append = false) {
+                    const $block = $("<div />", {html: $(`#tpl-${id}`).html()});
+                    $block.find("[data-tpl-key]").each(function() {
+                        const $this = $(this);
+
+                        let keys = $this.data("tpl-key");
+                        if (!Array.isArray(keys)) { keys = [keys] }
+
+                        let attrs = $this.data("tpl-attr");
+                        if (!Array.isArray(attrs)) { attrs = [attrs] }
+
+                        for (const [i, key] of keys.entries()) {
+                            if (!(key in context)) {
+                                continue
+                            }
+                            if (attrs[i] !== undefined) {
+                                $this.attr(attrs[i], context[key]);
+                            } else {
+                                $this.html(context[key]);
+                            }
+                        }
+                    });
+                    this[append ? "append" : "html"]($block.html());
+                    if (callback) {
+                        setTimeout(callback);
+                    }
+                }
+            });
+
+            let ws;
+            function wsSend(type, data) {
+                const message = {type: type};
+                if (data !== undefined) {
+                    message.data = data
+                }
+                ws.send(JSON.stringify(message));
+            }
+
+            const $main = $("main");
+            $main.on("keyup", "#form-enter-player", function() {
+                $("#form-enter :submit").prop("disabled", this.value === "");
+            });
+            $main.on("submit", "#form-enter", function(e) {
+                e.preventDefault();
+
+                const url = new URL(this.action);
+                url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
+                url.searchParams.set("player", $("#form-enter-player").val());
+                ws = wire(url);
+            });
+            $main.on("click", "#gp-controls-start", () => wsSend(3));  // wmtGameStarted
+            $main.on("click", "#gp-controls-next", () => wsSend(4));  // wmtNextQuestion
+            $main.on("click", "#gp-controls-finish", () => wsSend(9));  // wmtGameFinished
+            $main.on("click", "#gp-task-answers button", function() {
+                const $this = $(this);
+                $this.addClass("js-clicked");
+                $("#gp-task-answers button").prop("disabled", true);
+
+                const $index = $this.parent().data("index");
+                wsSend(7, $index); // wmtAnswer
+            });
+
+            const $toasts = $("#toasts");
+            $toasts.on("hidden.bs.toast", ".toast", function() {
+                $(this).remove();
+            });
+
+            function showToast(body) {
+                $toasts.template("toast", {body: body}, () => {
+                    $(".toast", $toasts).toast("show");
+                }, true);
+            }
+
+            $main.template("enter");
+
+            let myself;
+            function updateLeaderboard() {
+                const $leaderboard = $("#gp-leaderboard");
+
+                $leaderboard
+                    .find(".list-group-item")
+                        .sort((a, b) => $(a).data("score") < $(b).data("score") ? 1 : -1)
+                        .appendTo($leaderboard);
+
+                $leaderboard
+                    .find(".list-group-item")
+                        .removeClass("text-success text-warning text-danger")
+                        .eq(0).addClass("text-success").end()
+                        .eq(1).addClass("text-warning").end()
+                        .eq(2).addClass("text-danger");
+            }
+
+            function wire(url) {
+                const ws = new WebSocket(url);
+
+                let numTasks;
+                let currentTaskIdx = 0;
+
+                ws.onmessage = function(event) {
+                    const message = JSON.parse(event.data);
+                    switch (message.type) {
+                        case -2:  // wmtPlayerExists
+                            showToast(
+                                `<div class="text-danger"><i class="bi bi-shield-fill-exclamation"></i> ` +
+                                `Sorry, this name is already taken by someone!</div>`);
+                            $("#form-enter :submit").prop("disabled", false);
+                            ws.close(1000);
+                            break;
+                        case -1:  // wmtNotReady
+                            showToast(
+                                `<div class="text-danger"><i class="bi bi-shield-fill-exclamation"></i> ` +
+                                `Sorry, the game is not ready yet!</div>`);
+                            $("#form-enter :submit").prop("disabled", false);
+                            ws.close(1000);
+                            break;
+                        case 0:  // wmtReady
+                            $main.template("gameplay", {}, () => {
+                                const $task = $("#gp-task");
+                                $task.template("task", {
+                                    lead: "Psst",
+                                    question: "Welcome! Let's wait for others to join ;)"
+                                });
+
+                                numTasks = message.data.gp_num_tasks;
+
+                                const $leaderboard = $("#gp-leaderboard");
+                                for (const player of message.data.players) {
+                                    if (message.data.name === player.name) {
+                                        myself = player;
+                                    }
+                                    $leaderboard.template("leaderboard-player", {
+                                        name: player.name,
+                                        score: "0"
+                                    }, null, true);
+                                }
+
+                                $("[data-name]", $leaderboard).filter(function () {
+                                    return $(this).data("name") === myself.name;
+                                }).css("background-color", "#f0f0f0");
+
+                                updateLeaderboard();
+
+                                if (myself.is_author) {
+                                    $("#gp-controls").removeAttr("hidden");
+                                    if (message.data.gp_state !== 0) {
+                                        $("#gp-controls-start").prop("disabled", true);
+                                        $("#gp-controls-next, #gp-controls-finish").prop("disabled", false);
+                                    }
+                                }
+                            });
+                            break;
+                        case 1:  // wmtPlayerRegistered
+                            showToast(
+                                `<div class="text-success"><i class="bi bi-person-check-fill"></i> ` +
+                                `${message.data.name} has joined us :)</div>`);
+
+                            $("#gp-leaderboard").template("leaderboard-player", {
+                                name: message.data.name,
+                                score: "0"
+                            }, null, true);
+                            updateLeaderboard();
+                            break;
+                        case 2:  // wmtPlayerUnregistered
+                            showToast(
+                                `<div class="text-warning"><i class="bi bi-person-x-fill"></i> ` +
+                                `${message.data.name} has disconnected :(</div>`);
+
+                            $("#gp-leaderboard [data-name]").filter(function () {
+                                return $(this).data("name") === message.data.name;
+                            }).remove();
+                            updateLeaderboard();
+                            break;
+                        case 3:  // wmtGameStarted
+                            $("#gp-controls-start").prop("disabled", true);
+                            $("#gp-controls-next, #gp-controls-finish").prop("disabled", false);
+
+                            $("#gp-task").template("task", {
+                                lead: "Game is about to start...",
+                                question: `Get ready for the epic ${numTasks} questions!`
+                            });
+                            break;
+                        case 5:  // wmtTask
+                            currentTaskIdx++;
+                            $("#gp-task").template("task", {
+                                lead: `Question ${currentTaskIdx} of ${numTasks}`,
+                                timer: `${message.data.time_to_answer} s`,
+                                question: message.data.question
+                            }, () => {
+                                for (const [i, answer] of message.data.answers.entries()) {
+                                    $("#gp-task-answers").template("task-answer", {
+                                        index: i,
+                                        answer: answer
+                                    }, null, true);
+                                }
+                                $("#gp-task-timer").closest(".badge").removeAttr("hidden");
+                                if (myself.is_author && currentTaskIdx === numTasks) {
+                                    $("#gp-controls-next").prop("disabled", true);
+                                }
+                            });
+                            break;
+                        case 6:  // wmtTimer
+                            const timer = message.data;
+                            const $timer = $("#gp-task-timer");
+                            $timer.text(`${timer} s`);
+                            $timer.closest(".badge")
+                                .toggleClass("badge-success", timer >= 10)
+                                .toggleClass("badge-warning", timer > 3 && timer < 10)
+                                .toggleClass("badge-danger", timer <= 3);
+                            break;
+                        case 8:  // wmtTaskFinished
+                            $("#gp-task-timer").closest(".badge").remove();
+                            $("#gp-task-answers button").prop("disabled", true);
+                            $(`#gp-task-answers [data-index='${message.data.correct_answer_idx}'] button`)
+                                .addClass("js-correct");
+
+                            $("#gp-task-answers button.js-clicked:not(.js-correct)").addClass("js-incorrect");
+
+                            const stats = message.data.answer_stats;
+                            const total = Object.values(stats).reduce((a, b) => a + b, 0);
+                            $("#gp-task-answers button").html(function(index, html) {
+                                return `${html}<br><small>(${stats[index]} out of ${total})</small>`;
+                            });
+
+                            for (const score of message.data.scores) {
+                                $("#gp-leaderboard [data-name]").filter(function() {
+                                    return $(this).data("name") === score.player;
+                                }).data("score", score.score).find(".badge").text(score.score);
+                            }
+                            updateLeaderboard();
+                            break;
+                        case 9:  // wmtGameFinished
+                            const suffix = (n) => ["", "st", "nd", "rd"][n / 10 % 10 ^ 1 && n % 10] || "th";
+                            const name = (i) => message.data[i] ? message.data[i].player : "-";
+
+                            let points, place;
+                            for (const [i, score] of message.data.entries()) {
+                                if (score.player === myself.name) {
+                                    points = score.score;
+                                    place = i + 1;
+                                    break;
+                                }
+                            }
+
+                            $main.template("scores", {
+                                first: name(0),
+                                second: name(1),
+                                third: name(2),
+                                points: points,
+                                place: `(${place}${suffix(place)} place)`
+                            }, () => {
+                                $("body").addClass("bg-dark").css("overflow", "hidden");
+                                $("#podium").removeClass("init");
+                            });
+
+                            ws.close(1000);
+                    }
+                };
+                ws.onclose = function(event) {
+                    if (!event.wasClean) {
+                        window.location.reload();
+                    }
+                };
+                ws.onerror = function(error) {
+                    showToast(
+                        `<div class="text-danger"><i class="bi bi-shield-fill-exclamation"></i> ` +
+                        `Connection error: ${error.message}</div>`);
+                };
+                return ws;
+            }
+        })(jQuery);
+    </script>
+{{ end }}
