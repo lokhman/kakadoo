@@ -27,6 +27,10 @@ func getRouter(pool *app.Pool) *gin.Engine {
 	r.Static("/static", "./static/")
 	r.StaticFile("/favicon.ico", "./static/favicon.ico")
 
+	r.NoRoute(func(c *gin.Context) {
+		c.Redirect(http.StatusTemporaryRedirect, "/")
+	})
+
 	r.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index", nil)
 	})
@@ -34,7 +38,8 @@ func getRouter(pool *app.Pool) *gin.Engine {
 	rp := r.Group("/play/:id", func(c *gin.Context) {
 		game := app.GetGameByHash(c.Param("id"))
 		if game == nil {
-			c.AbortWithStatus(http.StatusNotFound)
+			c.Redirect(http.StatusTemporaryRedirect, "/")
+			c.Abort()
 			return
 		}
 		c.Set("game", game)
