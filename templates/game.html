@@ -76,10 +76,14 @@
             min-height: 120px;
             transition: transform 120ms ease-out;
         }
+        #gp-task-answers button.disabled,
+        #gp-task-answers button:disabled {
+            opacity: 0.40;
+        }
         #gp-task-answers button.js-clicked,
         #gp-task-answers button.js-correct,
-        #gp-task-answers button:not(.clicked):hover {
-            transform: scale(1.01);
+        #gp-task-answers button:not(:disabled):hover {
+            transform: scale(1.02);
         }
         #gp-task-answers > :nth-child(1) button {
             background-color: #51c0bf;
@@ -156,14 +160,14 @@
                 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff,
                 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff,
                 0 0 #fff, 0 0 #fff;
-            animation: 1s bang ease-out infinite backwards, 1s gravity ease-in infinite backwards,
-                5s position linear infinite backwards;
+            animation: 1s fw-bang ease-out infinite backwards, 1s fw-gravity ease-in infinite backwards,
+                5s fw-position linear infinite backwards;
         }
         .fw::after {
             animation-delay: 1.25s, 1.25s, 1.25s;
             animation-duration: 1.25s, 1.25s, 6.25s;
         }
-        @keyframes bang {
+        @keyframes fw-bang {
             to {
                 box-shadow: -33px -327.6666666667px #00ffaa, 78px -373.6666666667px #ff4000,
                     151px -362.6666666667px #ffbf00, -234px -116.6666666667px #00ff99, -110px -63.6666666667px #00b7ff,
@@ -185,13 +189,13 @@
                     -154px -391.6666666667px #ff001e;
             }
         }
-        @keyframes gravity {
+        @keyframes fw-gravity {
             to {
                 transform: translateY(200px);
                 opacity: 0;
             }
         }
-        @keyframes position {
+        @keyframes fw-position {
             0%, 19.9% {
                 margin-top: 10%;
                 margin-left: 40%;
@@ -211,6 +215,14 @@
             80%, 99.9% {
                 margin-top: 30%;
                 margin-left: 80%;
+            }
+        }
+        @media (max-width: 992px) {
+            #gp-task h1 {
+                font-size: 1.5rem;
+            }
+            #gp-task-answers button {
+                font-size: 1rem;
             }
         }
     </style>
@@ -254,21 +266,27 @@
 
     <script type="text/html" id="tpl-gameplay">
         <div class="row" style="height: inherit">
-            <div class="col-sm-8 col-md-9 col-lg-10" id="gp-task"></div>
-            <div class="col-sm-4 col-md-3 col-lg-2" style="height: inherit">
-                <ul class="list-group" id="gp-leaderboard" style="height: inherit; overflow: auto"></ul>
+            <div class="col-sm-8 col-md-9" id="gp-task"></div>
+            <div class="col-sm-4 col-md-3" style="height: inherit">
+                <div style="max-height: 100%; overflow-x: hidden; overflow-y: auto">
+                    <div class="row justify-content-between mb-2" id="gp-controls" hidden>
+                        <div class="col-8">
+                            <button class="btn btn-success btn-sm" id="gp-controls-start">
+                                <i class="bi bi-play-fill"></i> Start game
+                            </button>
+                            <button class="btn btn-danger btn-sm" id="gp-controls-finish" disabled>
+                                <i class="bi bi-stop-fill"></i> Finish game
+                            </button>
+                        </div>
+                        <div class="col-4">
+                            <button class="btn btn-primary btn-sm float-right" id="gp-controls-next" disabled>
+                                <i class="bi bi-arrow-right-circle"></i> Next task
+                            </button>
+                        </div>
+                    </div>
+                    <ul class="list-group" id="gp-leaderboard"></ul>
+                </div>
             </div>
-        </div>
-        <div id="gp-controls" hidden>
-            <button class="btn btn-success btn-sm" id="gp-controls-start">
-                <i class="bi bi-play-fill"></i> Start game
-            </button>
-            <button class="btn btn-danger btn-sm" id="gp-controls-finish" disabled>
-                <i class="bi bi-stop-fill"></i> Finish game
-            </button>
-            <button class="btn btn-primary btn-sm float-right" id="gp-controls-next" disabled>
-                <i class="bi bi-arrow-right-circle"></i> Next task
-            </button>
         </div>
     </script>
 
@@ -276,12 +294,12 @@
         <div class="jumbotron">
             <p class="lead">
                 <span data-tpl-key="lead"></span>
-                <span class="badge badge-success" style="font-size: inherit" hidden>
+                <span class="badge badge-success ml-2" style="font-size: inherit" hidden>
                     <span class="spinner-border spinner-border-sm" style="width: 1.25rem; height: 1.25rem"></span>
                     <span id="gp-task-timer" data-tpl-key="timer"></span>
                 </span>
             </p>
-            <h1 class="display-4" data-tpl-key="question"></h1>
+            <h1 class="display-5" data-tpl-key="question"></h1>
         </div>
         <div class="row" id="gp-task-answers"></div>
     </script>
@@ -351,7 +369,7 @@
             });
 
             let ws;
-            function wsSend(type, data) {
+            const wsSend = (type, data) => {
                 const message = {type: type};
                 if (data !== undefined) {
                     message.data = data
@@ -388,7 +406,7 @@
                 $(this).remove();
             });
 
-            function showToast(body) {
+            const showToast = (body) => {
                 $toasts.template("toast", {body: body}, () => {
                     $(".toast", $toasts).toast("show");
                 }, true);
@@ -397,7 +415,7 @@
             $main.template("enter");
 
             let myself;
-            function updateLeaderboard() {
+            const updateLeaderboard = () => {
                 const $leaderboard = $("#gp-leaderboard");
 
                 $leaderboard
@@ -419,8 +437,8 @@
                 let numTasks;
                 let currentTaskIdx = 0;
 
-                ws.onmessage = function(event) {
-                    const message = JSON.parse(event.data);
+                ws.onmessage = function(e) {
+                    const message = JSON.parse(e.data);
                     switch (message.type) {
                         case -2:  // wmtPlayerExists
                             showToast(
@@ -440,8 +458,8 @@
                             $main.template("gameplay", {}, () => {
                                 const $task = $("#gp-task");
                                 $task.template("task", {
-                                    lead: "Psst",
-                                    question: "Welcome! Let's wait for others to join ;)"
+                                    lead: "Welcome!",
+                                    question: "Let's wait for others to join ;)"
                                 });
 
                                 numTasks = message.data.gp_num_tasks;
@@ -471,6 +489,8 @@
                                     }
                                 }
                             });
+
+                            window.onbeforeunload = () => "You will loose your points if you leave.";
                             break;
                         case 1:  // wmtPlayerRegistered
                             showToast(
@@ -498,7 +518,7 @@
                             $("#gp-controls-next, #gp-controls-finish").prop("disabled", false);
 
                             $("#gp-task").template("task", {
-                                lead: "Game is about to start...",
+                                lead: "It's about to start...",
                                 question: `Get ready for the epic ${numTasks} questions!`
                             });
                             break;
@@ -516,9 +536,7 @@
                                     }, null, true);
                                 }
                                 $("#gp-task-timer").closest(".badge").removeAttr("hidden");
-                                if (myself.is_author && currentTaskIdx === numTasks) {
-                                    $("#gp-controls-next").prop("disabled", true);
-                                }
+                                $("#gp-controls-next").prop("disabled", true);
                             });
                             break;
                         case 6:  // wmtTimer
@@ -550,6 +568,9 @@
                                 }).data("score", score.score).find(".badge").text(score.score);
                             }
                             updateLeaderboard();
+                            if (currentTaskIdx < numTasks) {
+                                $("#gp-controls-next").prop("disabled", false);
+                            }
                             break;
                         case 9:  // wmtGameFinished
                             const suffix = (n) => ["", "st", "nd", "rd"][n / 10 % 10 ^ 1 && n % 10] || "th";
@@ -578,15 +599,17 @@
                             ws.close(1000);
                     }
                 };
-                ws.onclose = function(event) {
-                    if (!event.wasClean) {
+                ws.onclose = function(e) {
+                    window.onbeforeunload = undefined;
+
+                    if (!e.wasClean) {
                         window.location.reload();
                     }
                 };
-                ws.onerror = function(error) {
+                ws.onerror = function(err) {
                     showToast(
                         `<div class="text-danger"><i class="bi bi-shield-fill-exclamation"></i> ` +
-                        `Connection error: ${error.message}</div>`);
+                        `Connection error: ${err.message}</div>`);
                 };
                 return ws;
             }
