@@ -459,7 +459,9 @@
                                 const $task = $("#gp-task");
                                 $task.template("task", {
                                     lead: "Welcome!",
-                                    question: "Let's wait for others to join ;)"
+                                    question: message.data.gp_state === 0 ?
+                                        "Let's wait for others to join ;)" :
+                                        "Wait for the next task to start ;)"
                                 });
 
                                 numTasks = message.data.gp_num_tasks;
@@ -523,7 +525,8 @@
                             });
                             break;
                         case 5:  // wmtTask
-                            currentTaskIdx++;
+                            currentTaskIdx = message.data.index;
+
                             $("#gp-task").template("task", {
                                 lead: `Question ${currentTaskIdx} of ${numTasks}`,
                                 timer: `${message.data.time_to_answer} s`,

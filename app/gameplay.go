@@ -29,7 +29,11 @@ func (gp *gameplay) Init(player *Player) {
 	gp.mu.Lock()
 	defer gp.mu.Unlock()
 
-	gp.scores[player] = make([]int64, len(gp.tasks))
+	scores := make([]int64, len(gp.tasks))
+	gp.scores[player] = scores
+	for i := range scores {
+		scores[i] = -1
+	}
 }
 
 func (gp *gameplay) Start() int {
@@ -38,11 +42,6 @@ func (gp *gameplay) Start() int {
 
 	gp.state = gpsStarted
 	gp.currentTaskIdx = 0
-	for _, scores := range gp.scores {
-		for i := range scores {
-			scores[i] = -1
-		}
-	}
 	return len(gp.tasks)
 }
 

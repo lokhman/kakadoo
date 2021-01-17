@@ -108,6 +108,7 @@ func wireReader(pool *Pool, player *Player) {
 						Message: &wireMessage{
 							Type: wmtTask,
 							Data: map[string]interface{}{
+								"index":          player.gameplay.currentTaskIdx + 1,
 								"question":       task.question(),
 								"answers":        task.answers(),
 								"time_to_answer": task.timeToAnswer() / time.Second,
@@ -142,7 +143,7 @@ func wireReader(pool *Pool, player *Player) {
 	}
 }
 
-func wireWriter(pool *Pool, player *Player) {
+func wireWriter(_ *Pool, player *Player) {
 	ticker := time.NewTicker(wirePingPeriod)
 	defer func() {
 		ticker.Stop()
