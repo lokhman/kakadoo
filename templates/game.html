@@ -107,11 +107,15 @@
         #gp-task-answers button.js-incorrect {
             background-color: #dc3545;
         }
+        #gp-task-answers button.js-clicked::before,
         #gp-task-answers button.js-correct::before,
         #gp-task-answers button.js-incorrect::before
         {
             font-weight: bold;
             margin-right: 5px;
+        }
+        #gp-task-answers button.js-clicked::before {
+            content: "\2b58";
         }
         #gp-task-answers button.js-correct::before {
             content: "\2713";
