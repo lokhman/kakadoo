@@ -575,9 +575,17 @@
                             });
 
                             for (const score of message.data.scores) {
-                                $("#gp-leaderboard [data-name]").filter(function() {
+                                const $player = $("#gp-leaderboard [data-name]").filter(function() {
                                     return $(this).data("name") === score.player;
-                                }).data("score", score.score).find(".badge").text(score.score);
+                                });
+                                const $badge = $player.find(".badge");
+                                $({score: $player.data("score")}).animate({score: score.score}, {
+                                    duration: 1000,
+                                    easing: "swing",
+                                    step: function() { $badge.text(this.score | 0) },
+                                    complete: () => $badge.text(score.score)
+                                });
+                                $player.data("score", score.score);
                             }
                             updateLeaderboard();
                             if (currentTaskIdx < numTasks) {
