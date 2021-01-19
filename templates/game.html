@@ -440,9 +440,13 @@
 
                 let numTasks;
                 let currentTaskIdx = 0;
-                let cleanClose = false;
+                let closing = false;
 
                 ws.onmessage = function(e) {
+                    if (closing) {
+                        return;
+                    }
+
                     const message = JSON.parse(e.data);
                     switch (message.type) {
                         case -2:  // wmtPlayerExists
@@ -604,21 +608,23 @@
                                 $("#podium").removeClass("init");
                             });
 
-                            cleanClose = true;
+                            closing = true;
                             setTimeout(() => ws.close(1000), 100);
                     }
                 };
                 ws.onclose = function(e) {
                     window.onbeforeunload = undefined;
 
-                    if (!cleanClose && !e.wasClean) {
+                    if (!closing && !e.wasClean) {
                         window.location.reload();
                     }
                 };
                 ws.onerror = function(err) {
-                    showToast(
-                        `<div class="text-danger"><i class="bi bi-shield-fill-exclamation"></i> ` +
-                        `Connection error: ${err.message}</div>`);
+                    if (!closing) {
+                        showToast(
+                            `<div class="text-danger"><i class="bi bi-shield-fill-exclamation"></i> ` +
+                            `Connection error: ${err.message}</div>`);
+                    }
                 };
                 return ws;
             }
