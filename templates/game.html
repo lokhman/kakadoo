@@ -440,6 +440,7 @@
 
                 let numTasks;
                 let currentTaskIdx = 0;
+                let cleanClose = false;
 
                 ws.onmessage = function(e) {
                     const message = JSON.parse(e.data);
@@ -603,13 +604,14 @@
                                 $("#podium").removeClass("init");
                             });
 
-                            ws.close(1000);
+                            cleanClose = true;
+                            setTimeout(() => ws.close(1000), 100);
                     }
                 };
                 ws.onclose = function(e) {
                     window.onbeforeunload = undefined;
 
-                    if (!e.wasClean) {
+                    if (!cleanClose && !e.wasClean) {
                         window.location.reload();
                     }
                 };
