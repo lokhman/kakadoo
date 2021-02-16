@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -21,7 +22,8 @@ func getRouter(pool *app.Pool) *gin.Engine {
 
 	renderer := multitemplate.NewRenderer()
 	renderer.AddFromFiles("index", "templates/index.html")
-	renderer.AddFromFiles("game", "templates/index.html", "templates/game.html")
+	renderer.AddFromFiles("games", "templates/index.html", "templates/games.html")
+	renderer.AddFromFiles("play", "templates/index.html", "templates/play.html")
 	r.HTMLRender = renderer
 
 	r.Static("/static", "./static/")
@@ -47,7 +49,7 @@ func getRouter(pool *app.Pool) *gin.Engine {
 
 	rp.GET("", func(c *gin.Context) {
 		game := c.MustGet("game").(*app.Game)
-		c.HTML(http.StatusOK, "game", gin.H{
+		c.HTML(http.StatusOK, "play", gin.H{
 			"title":   game.Title,
 			"wireURL": c.Request.URL.Path + "/wire",
 		})
@@ -67,6 +69,26 @@ func getRouter(pool *app.Pool) *gin.Engine {
 			player.IsAuthor = true
 		}
 		app.WireHandler(pool, player, c.Writer, c.Request)
+	})
+
+	r.GET("/games", func(c *gin.Context) {
+		type Game struct {
+			ID    string `json:"id"`
+			Title string `json:"title"`
+			URL   string `json:"url"`
+		}
+		games := app.GetGames()
+
+		ctx := make([]Game, len(games))
+		for i, game := range games {
+			id := app.GameHashID.Encode(game.ID)
+			ctx[i] = Game{
+				ID:    id,
+				Title: game.Title,
+				URL:   fmt.Sprintf("/play/%s", id),
+			}
+		}
+		c.HTML(http.StatusOK, "games", ctx)
 	})
 
 	return r

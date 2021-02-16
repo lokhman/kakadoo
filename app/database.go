@@ -59,6 +59,26 @@ func (g *Game) GetTasks() []Task {
 	return tasks
 }
 
+func GetGames() []*Game {
+	q := QB.Select("id", "title", "author").From("games").OrderBy("created_at")
+	rows, err := q.Query()
+	defer func() { _ = rows.Close() }()
+
+	games := make([]*Game, 0)
+	for rows.Next() {
+		game := &Game{}
+		err = rows.Scan(&game.ID, &game.Title, &game.Author)
+		if err != nil {
+			panic(err)
+		}
+		games = append(games, game)
+	}
+	if err = rows.Err(); err != nil {
+		panic(err)
+	}
+	return games
+}
+
 func GetGameByHash(hash string) *Game {
 	id := GameHashID.Decode(hash)
 	if id == -1 {
