@@ -1,0 +1,19 @@
+{{ define "styles" }}
+<style>
+    main {
+        width: inherit;
+    }
+</style>
+{{ end }}
+
+{{ define "content" }}
+<main>
+    <h1 class="display-4">Games</h1>
+
+    <ul class="mt-4">
+        {{ range $game := . }}
+            <li><a href="{{ $game.URL }}">{{ $game.Title }}</a></li>
+        {{ end }}
+    </ul>
+</main>
+{{ end }}
