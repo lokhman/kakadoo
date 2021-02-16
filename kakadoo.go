@@ -36,41 +36,6 @@ func getRouter(pool *app.Pool) *gin.Engine {
 	r.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index", nil)
 	})
-
-	rp := r.Group("/play/:id", func(c *gin.Context) {
-		game := app.GetGameByHash(c.Param("id"))
-		if game == nil {
-			c.Redirect(http.StatusTemporaryRedirect, "/")
-			c.Abort()
-			return
-		}
-		c.Set("game", game)
-	})
-
-	rp.GET("", func(c *gin.Context) {
-		game := c.MustGet("game").(*app.Game)
-		c.HTML(http.StatusOK, "play", gin.H{
-			"title":   game.Title,
-			"wireURL": c.Request.URL.Path + "/wire",
-		})
-	})
-
-	rp.GET("/wire", func(c *gin.Context) {
-		game := c.MustGet("game").(*app.Game)
-		player := &app.Player{
-			Game: game,
-			Name: app.StripHtmlTags(c.Query("player")),
-		}
-		if player.Name == "" {
-			c.AbortWithStatus(http.StatusBadRequest)
-			return
-		}
-		if player.Name == game.Author {
-			player.IsAuthor = true
-		}
-		app.WireHandler(pool, player, c.Writer, c.Request)
-	})
-
 	r.GET("/games", func(c *gin.Context) {
 		type Game struct {
 			ID    string `json:"id"`
@@ -91,6 +56,37 @@ func getRouter(pool *app.Pool) *gin.Engine {
 		c.HTML(http.StatusOK, "games", ctx)
 	})
 
+	rp := r.Group("/play/:id", func(c *gin.Context) {
+		game := app.GetGameByHash(c.Param("id"))
+		if game == nil {
+			c.Redirect(http.StatusTemporaryRedirect, "/")
+			c.Abort()
+			return
+		}
+		c.Set("game", game)
+	})
+	rp.GET("", func(c *gin.Context) {
+		game := c.MustGet("game").(*app.Game)
+		c.HTML(http.StatusOK, "play", gin.H{
+			"title":   game.Title,
+			"wireURL": c.Request.URL.Path + "/wire",
+		})
+	})
+	rp.GET("/wire", func(c *gin.Context) {
+		game := c.MustGet("game").(*app.Game)
+		player := &app.Player{
+			Game: game,
+			Name: app.StripHtmlTags(c.Query("player")),
+		}
+		if player.Name == "" {
+			c.AbortWithStatus(http.StatusBadRequest)
+			return
+		}
+		if player.Name == game.Author {
+			player.IsAuthor = true
+		}
+		app.WireHandler(pool, player, c.Writer, c.Request)
+	})
 	return r
 }
 
