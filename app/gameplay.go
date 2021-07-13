@@ -1,6 +1,7 @@
 package app
 
 import (
+	"math"
 	"sort"
 	"sync"
 	"time"
@@ -14,6 +15,8 @@ const (
 	gpsAccepting
 	gpsFinished
 )
+
+const correctAnswerBaseScore = 15_000
 
 type gameplay struct {
 	tasks              []Task
@@ -100,7 +103,8 @@ func (gp *gameplay) Answer(player *Player, idx int) int64 {
 
 	var score int64 = 0
 	if task.correctAnswerIdx() == idx {
-		score = gp.deadline.Sub(time.Now()).Milliseconds()
+		baseScore := correctAnswerBaseScore * (1 / math.Max(task.timeToAnswer().Seconds(), 1))
+		score = int64(baseScore) + gp.deadline.Sub(time.Now()).Milliseconds()
 	}
 	scores[gp.currentTaskIdx] = score
 	gp.currentAnswerStats[idx]++
