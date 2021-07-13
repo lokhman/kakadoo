@@ -151,6 +151,17 @@
         #podium > :nth-child(3) {
             height: 75px;
         }
+        .jumbotron {
+            background: linear-gradient(-45deg,
+                rgba(238, 119, 82, 0.75), rgba(231, 60, 126, 0.75), rgba(35, 166, 213, 0.75), rgba(35, 213, 71, 0.75));
+            background-size: 400% 400%;
+            animation: jumbotron-gradient 15s ease infinite;
+        }
+        @keyframes jumbotron-gradient {
+            0% { background-position: 0 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0 50%; }
+        }
         .fw::before, .fw::after {
             content: "";
             position: absolute;
@@ -194,32 +205,14 @@
             }
         }
         @keyframes fw-gravity {
-            to {
-                transform: translateY(200px);
-                opacity: 0;
-            }
+            to { transform: translateY(200px); opacity: 0; }
         }
         @keyframes fw-position {
-            0%, 19.9% {
-                margin-top: 10%;
-                margin-left: 40%;
-            }
-            20%, 39.9% {
-                margin-top: 40%;
-                margin-left: 30%;
-            }
-            40%, 59.9% {
-                margin-top: 20%;
-                margin-left: 70%;
-            }
-            60%, 79.9% {
-                margin-top: 30%;
-                margin-left: 20%;
-            }
-            80%, 99.9% {
-                margin-top: 30%;
-                margin-left: 80%;
-            }
+            0%, 19.9% { margin-top: 10%; margin-left: 40%; }
+            20%, 39.9% { margin-top: 40%; margin-left: 30%; }
+            40%, 59.9% { margin-top: 20%; margin-left: 70%; }
+            60%, 79.9% { margin-top: 30%; margin-left: 20%; }
+            80%, 99.9% { margin-top: 30%; margin-left: 80%; }
         }
         @media (max-width: 992px) {
             #gp-task h1 {
@@ -284,11 +277,14 @@
                         </div>
                         <div class="col-4">
                             <button class="btn btn-primary btn-sm float-right" id="gp-controls-next" disabled>
-                                <i class="bi bi-arrow-right-circle"></i> Next task
+                                <i class="bi bi-arrow-right-circle"></i> <span>First task</span>
                             </button>
                         </div>
                     </div>
                     <ul class="list-group" id="gp-leaderboard"></ul>
+                    <div style="position: sticky; bottom: 0; padding-top: 10px; background-color: #f5f5f5">
+                        Total: <span id="gp-leaderboard-total">0</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -329,10 +325,10 @@
                 <div class="row init" id="podium">
                     <div class="col-4 bg-warning" data-tpl-key="second"></div>
                     <div class="col-4 bg-success" data-tpl-key="first"></div>
-                    <div class="col-4 bg-danger" data-tpl-key="third">Alex L</div>
+                    <div class="col-4 bg-danger" data-tpl-key="third"></div>
                 </div>
                 <p class="lead mt-4">
-                    You scored <span data-tpl-key="points">23433</span> points!<br>
+                    You scored <span data-tpl-key="points">0</span> points!<br>
                     <small data-tpl-key="place"></small>
                 </p>
             </div>
@@ -421,6 +417,7 @@
             let myself;
             const updateLeaderboard = () => {
                 const $leaderboard = $("#gp-leaderboard");
+                const $leaderboardTotal = $("#gp-leaderboard-total");
 
                 $leaderboard
                     .find(".list-group-item")
@@ -433,6 +430,8 @@
                         .eq(0).addClass("text-success").end()
                         .eq(1).addClass("text-warning").end()
                         .eq(2).addClass("text-danger");
+
+                $leaderboardTotal.text($leaderboard.find(".list-group-item").length);
             }
 
             function wire(url) {
@@ -495,8 +494,10 @@
                                 if (myself.is_author) {
                                     $("#gp-controls").removeAttr("hidden");
                                     if (message.data.gp_state !== 0) {
+                                        // if author was disconnected during the game
                                         $("#gp-controls-start").prop("disabled", true);
                                         $("#gp-controls-next, #gp-controls-finish").prop("disabled", false);
+                                        $("#gp-controls-next span").text("Next task");
                                     }
                                 }
                             });
@@ -548,7 +549,8 @@
                                     }, null, true);
                                 }
                                 $("#gp-task-timer").closest(".badge").removeAttr("hidden");
-                                $("#gp-controls-next").prop("disabled", true);
+                                $("#gp-controls-next").prop("disabled", true)
+                                    .children("span").text(currentTaskIdx === numTasks - 1 ? "Last task" : "Next task");
                             });
                             break;
                         case 6:  // wmtTimer
