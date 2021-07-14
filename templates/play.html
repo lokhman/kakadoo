@@ -550,7 +550,7 @@
                                 }
                                 $("#gp-task-timer").closest(".badge").removeAttr("hidden");
                                 $("#gp-controls-next").prop("disabled", true)
-                                    .children("span").text(currentTaskIdx === numTasks - 1 ? "Last task" : "Next task");
+                                    .children("span").text(currentTaskIdx >= numTasks - 1 ? "Last task" : "Next task");
                             });
                             break;
                         case 6:  // wmtTimer

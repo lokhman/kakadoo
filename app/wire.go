@@ -80,7 +80,7 @@ func wireReader(pool *Pool, player *Player) {
 					},
 				}
 			case wmtNextQuestion:
-				var task Task
+				var task *Task
 				task = player.gameplay.NextTask(func(timer int) {
 					pool.broadcast <- &broadcastMessage{
 						Game: player.Game,

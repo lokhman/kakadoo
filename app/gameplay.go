@@ -19,7 +19,7 @@ const (
 const correctAnswerBaseScore = 15_000
 
 type gameplay struct {
-	tasks              []Task
+	tasks              []*Task
 	currentTaskIdx     int
 	currentAnswerStats map[int]int
 	scores             gpScores
@@ -48,7 +48,7 @@ func (gp *gameplay) Start() int {
 	return len(gp.tasks)
 }
 
-func (gp *gameplay) NextTask(tick func(int), callback func(gp *gameplay)) Task {
+func (gp *gameplay) NextTask(tick func(int), callback func(gp *gameplay)) *Task {
 	gp.mu.Lock()
 	defer gp.mu.Unlock()
 

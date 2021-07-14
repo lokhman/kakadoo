@@ -24,11 +24,28 @@ func init() {
 	QB = sqrl.StatementBuilder.PlaceholderFormat(sqrl.Dollar).RunWith(DB)
 }
 
-type Task interface {
-	question() string
-	answers() []string
-	correctAnswerIdx() int
-	timeToAnswer() time.Duration
+type Task struct {
+	ID               int
+	Question         string
+	Answers          pq.StringArray
+	CorrectAnswerIdx int
+	TimeToAnswer     int
+}
+
+func (t *Task) question() string {
+	return t.Question
+}
+
+func (t *Task) answers() []string {
+	return t.Answers
+}
+
+func (t *Task) correctAnswerIdx() int {
+	return t.CorrectAnswerIdx
+}
+
+func (t *Task) timeToAnswer() time.Duration {
+	return time.Duration(t.TimeToAnswer) * time.Second
 }
 
 type Game struct {
@@ -38,20 +55,20 @@ type Game struct {
 	IsStarted bool
 }
 
-func (g *Game) GetTasks() []Task {
+func (g *Game) GetTasks() []*Task {
 	q := QB.Select("id", "question", "answers", "correct_answer_idx", "time_to_answer").
-		From("quiz").Where("game_id = ?", g.ID).OrderBy("id")
+		From("tasks").Where("game_id = ?", g.ID).OrderBy("id")
 	rows, err := q.Query()
 	defer func() { _ = rows.Close() }()
 
-	tasks := make([]Task, 0)
+	tasks := make([]*Task, 0)
 	for rows.Next() {
-		quiz := &Quiz{}
-		err = rows.Scan(&quiz.ID, &quiz.Question, &quiz.Answers, &quiz.CorrectAnswerIdx, &quiz.TimeToAnswer)
+		task := &Task{}
+		err = rows.Scan(&task.ID, &task.Question, &task.Answers, &task.CorrectAnswerIdx, &task.TimeToAnswer)
 		if err != nil {
 			panic(err)
 		}
-		tasks = append(tasks, quiz)
+		tasks = append(tasks, task)
 	}
 	if err = rows.Err(); err != nil {
 		panic(err)
@@ -94,28 +111,4 @@ func GetGameByHash(hash string) *Game {
 		panic(err)
 	}
 	return game
-}
-
-type Quiz struct {
-	ID               int
-	Question         string
-	Answers          pq.StringArray
-	CorrectAnswerIdx int
-	TimeToAnswer     int
-}
-
-func (q *Quiz) question() string {
-	return q.Question
-}
-
-func (q *Quiz) answers() []string {
-	return q.Answers
-}
-
-func (q *Quiz) correctAnswerIdx() int {
-	return q.CorrectAnswerIdx
-}
-
-func (q *Quiz) timeToAnswer() time.Duration {
-	return time.Duration(q.TimeToAnswer) * time.Second
 }
