@@ -106,7 +106,6 @@ func wireReader(pool *Pool, player *Player) {
 								"correct_answer": task.CorrectAnswer,
 								"stats":          stats,
 								"scores":         gp.scores.Leaderboard(),
-								"flash_message":  gp.flashMessage,
 							},
 						},
 					}
