@@ -18,6 +18,11 @@ const (
 	gpsFinished
 )
 
+const (
+	wocPlayerMean   = "Mean"
+	wocPlayerMedian = "Median"
+)
+
 const correctAnswerBaseScore = 15_000
 
 type gameplay struct {
@@ -37,6 +42,20 @@ func (gp *gameplay) Init(player *Player) {
 	defer gp.mu.Unlock()
 
 	gp.scores[player] = make([]float64, len(gp.tasks))
+}
+
+func (gp *gameplay) GetPlayers() []*Player {
+	gp.mu.Lock()
+	defer gp.mu.Unlock()
+
+	players := make([]*Player, len(gp.scores))
+
+	i := 0
+	for player := range gp.scores {
+		players[i] = player
+		i++
+	}
+	return players
 }
 
 func (gp *gameplay) Start() int {
@@ -120,8 +139,8 @@ func (gp *gameplay) calculateScores(task *Task) {
 			panic(err)
 		}
 
-		mean := 0.0
-		median := 0.0
+		meanValue := 0.0
+		medianValue := 0.0
 
 		type wocScore struct {
 			player *Player
@@ -135,24 +154,39 @@ func (gp *gameplay) calculateScores(task *Task) {
 					player: player,
 					value:  answer,
 				})
-				mean += answer
+				meanValue += answer
 			}
 		}
 
-		mean /= float64(len(scores))
+		meanValue /= float64(len(scores))
 		sort.Slice(scores, func(i, j int) bool {
 			return scores[i].value < scores[j].value
 		})
 
 		index := len(scores) / 2
 		if len(scores)%2 == 0 {
-			median = (scores[index-1].value + scores[index].value) / 2
+			medianValue = (scores[index-1].value + scores[index].value) / 2
 		} else {
-			median = scores[index].value
+			medianValue = scores[index].value
 		}
 
-		scores = append(scores, &wocScore{value: mean}, &wocScore{value: median})
-		gp.flashMessage = fmt.Sprintf("Mean: %.2f | Median: %.2f", mean, median)
+		var meanPlayer, medianPlayer *Player
+		for player := range gp.scores {
+			if player.Name == wocPlayerMean {
+				meanPlayer = player
+			} else if player.Name == wocPlayerMedian {
+				medianPlayer = player
+			}
+		}
+
+		scores = append(scores, &wocScore{
+			value:  meanValue,
+			player: meanPlayer,
+		}, &wocScore{
+			value:  medianValue,
+			player: medianPlayer,
+		})
+		// gp.flashMessage = fmt.Sprintf("Mean: %.2f | Median: %.2f", meanValue, medianValue)
 
 		for _, score := range scores {
 			value := score.value
@@ -182,9 +216,6 @@ func (gp *gameplay) calculateScores(task *Task) {
 
 		for _, group := range groups {
 			for _, player := range group.players {
-				if player == nil {
-					continue
-				}
 				score := 0.0
 				for _, index = range group.indexes {
 					score += float64(index)

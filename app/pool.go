@@ -1,7 +1,6 @@
 package app
 
 import (
-	"sort"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -65,6 +64,10 @@ func (p *Pool) Run() {
 			if gp == nil {
 				if player.IsAuthor {
 					gp = newGameplay(player.Game)
+					if gp.gameType == gameTypeWoC {
+						gp.Init(&Player{Name: wocPlayerMean})
+						gp.Init(&Player{Name: wocPlayerMedian})
+					}
 				} else {
 					player.send <- &wireMessage{Type: wmtNotReady}
 					go player.closeWithDelay()
@@ -79,23 +82,19 @@ func (p *Pool) Run() {
 				}
 			}
 
-			players = append(players, player)
-			sort.Slice(players, func(i, j int) bool {
-				return players[i].Name < players[j].Name
-			})
+			player.gameplay = gp
+			player.gameplay.Init(player)
+
 			player.send <- &wireMessage{
 				Type: wmtReady,
 				Data: map[string]interface{}{
 					"name":         player.Name,
-					"players":      players,
+					"players":      gp.GetPlayers(),
 					"gp_type":      gp.gameType,
 					"gp_state":     gp.state,
 					"gp_num_tasks": len(gp.tasks),
 				},
 			}
-
-			player.gameplay = gp
-			player.gameplay.Init(player)
 
 			p.players[player] = struct{}{}
 		case player := <-p.unregister:
