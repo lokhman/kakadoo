@@ -655,13 +655,14 @@
                                     return $(this).data("name") === score.player;
                                 });
                                 const $badge = $player.find(".badge");
-                                $({score: $player.data("score")}).animate({score: score.score}, {
+                                const scoreFixed = +score.score.toFixed(2);
+                                $({score: $player.data("score")}).animate({score: scoreFixed}, {
                                     duration: 1000,
                                     easing: "swing",
                                     step: function() { $badge.text(this.score | 0) },
-                                    complete: () => $badge.text(score.score)
+                                    complete: () => $badge.text(scoreFixed)
                                 });
-                                $player.data("score", score.score);
+                                $player.data("score", scoreFixed);
                             }
                             updateLeaderboard();
                             if (message.data.index < numTasks - 1) {
@@ -675,7 +676,7 @@
                             let points, place;
                             for (const [i, score] of message.data.entries()) {
                                 if (score.player === myself.name) {
-                                    points = score.score;
+                                    points = +score.score.toFixed(2);
                                     place = i + 1;
                                     break;
                                 }

@@ -5,7 +5,6 @@ import (
 	"math"
 	"sort"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 )
@@ -230,7 +229,7 @@ func (s gpScores) Leaderboard() []lbScore {
 		}
 		board[index] = lbScore{
 			Player: player.Name,
-			Score:  strings.TrimRight(strings.TrimRight(fmt.Sprintf("%.2f", total), "0"), "."),
+			Score:  total,
 		}
 		index++
 	}
@@ -241,6 +240,6 @@ func (s gpScores) Leaderboard() []lbScore {
 }
 
 type lbScore struct {
-	Player string `json:"player"`
-	Score  string `json:"score"`
+	Player string  `json:"player"`
+	Score  float64 `json:"score"`
 }
