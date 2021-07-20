@@ -24,24 +24,18 @@ func init() {
 	QB = sqrl.StatementBuilder.PlaceholderFormat(sqrl.Dollar).RunWith(DB)
 }
 
+const (
+	taskQuiz = "quiz"
+	taskWoC  = "woc"
+)
+
 type Task struct {
-	ID               int
-	Question         string
-	Answers          pq.StringArray
-	CorrectAnswerIdx int
-	TimeToAnswer     int
-}
-
-func (t *Task) question() string {
-	return t.Question
-}
-
-func (t *Task) answers() []string {
-	return t.Answers
-}
-
-func (t *Task) correctAnswerIdx() int {
-	return t.CorrectAnswerIdx
+	ID            int
+	Type          string
+	Question      string
+	Answers       pq.StringArray
+	CorrectAnswer string
+	TimeToAnswer  int
 }
 
 func (t *Task) timeToAnswer() time.Duration {
@@ -56,7 +50,7 @@ type Game struct {
 }
 
 func (g *Game) GetTasks() []*Task {
-	q := QB.Select("id", "question", "answers", "correct_answer_idx", "time_to_answer").
+	q := QB.Select("id", "type", "question", "answers", "correct_answer", "time_to_answer").
 		From("tasks").Where("game_id = ?", g.ID).OrderBy("id")
 	rows, err := q.Query()
 	defer func() { _ = rows.Close() }()
@@ -64,7 +58,7 @@ func (g *Game) GetTasks() []*Task {
 	tasks := make([]*Task, 0)
 	for rows.Next() {
 		task := &Task{}
-		err = rows.Scan(&task.ID, &task.Question, &task.Answers, &task.CorrectAnswerIdx, &task.TimeToAnswer)
+		err = rows.Scan(&task.ID, &task.Type, &task.Question, &task.Answers, &task.CorrectAnswer, &task.TimeToAnswer)
 		if err != nil {
 			panic(err)
 		}

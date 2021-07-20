@@ -71,57 +71,60 @@
             width: 100%;
             height: auto;
         }
-        #gp-task-answers button {
+        #gp-task-answers .gp-task-answer {
             color: #fff;
             min-height: 120px;
             transition: transform 120ms ease-out;
         }
-        #gp-task-answers button.disabled,
-        #gp-task-answers button:disabled {
+        #gp-task-answers .gp-task-answer.disabled,
+        #gp-task-answers .gp-task-answer:disabled {
             opacity: 0.40;
         }
-        #gp-task-answers button.js-clicked,
-        #gp-task-answers button.js-correct,
-        #gp-task-answers button:not(:disabled):hover {
+        #gp-task-answers .gp-task-answer.js-clicked,
+        #gp-task-answers .gp-task-answer.js-correct,
+        #gp-task-answers .gp-task-answer:not(:disabled):hover {
             transform: scale(1.02);
         }
-        #gp-task-answers > :nth-child(1) button {
+        #gp-task-answers > :nth-child(1) .gp-task-answer {
             background-color: #51c0bf;
         }
-        #gp-task-answers > :nth-child(2) button {
+        #gp-task-answers > :nth-child(2) .gp-task-answer {
             background-color: #9fa3e3;
         }
-        #gp-task-answers > :nth-child(3) button {
+        #gp-task-answers > :nth-child(3) .gp-task-answer {
             background-color: #59add0;
         }
-        #gp-task-answers > :nth-child(4) button {
+        #gp-task-answers > :nth-child(4) .gp-task-answer {
             background-color: #7095e1;
         }
-        #gp-task-answers button.js-clicked,
-        #gp-task-answers button.js-correct {
+        #gp-task-answers .gp-task-answer.js-clicked,
+        #gp-task-answers .gp-task-answer.js-correct {
             opacity: 1;
         }
-        #gp-task-answers button.js-correct {
+        #gp-task-answers .gp-task-answer.js-correct {
             background-color: #28a745;
         }
-        #gp-task-answers button.js-incorrect {
+        #gp-task-answers .gp-task-answer.js-incorrect {
             background-color: #dc3545;
         }
-        #gp-task-answers button.js-clicked::before,
-        #gp-task-answers button.js-correct::before,
-        #gp-task-answers button.js-incorrect::before
+        #gp-task-answers .gp-task-answer.js-clicked::before,
+        #gp-task-answers .gp-task-answer.js-correct::before,
+        #gp-task-answers .gp-task-answer.js-incorrect::before
         {
             font-weight: bold;
             margin-right: 5px;
         }
-        #gp-task-answers button.js-clicked::before {
+        #gp-task-answers .gp-task-answer.js-clicked::before {
             content: "\2b58";
         }
-        #gp-task-answers button.js-correct::before {
+        #gp-task-answers .gp-task-answer.js-correct::before {
             content: "\2713";
         }
-        #gp-task-answers button.js-incorrect::before {
+        #gp-task-answers .gp-task-answer.js-incorrect::before {
             content: "\2715";
+        }
+        #gp-task-answers .gp-task-answer-input input {
+            height: 75px;
         }
         #scores {
             height: inherit;
@@ -218,7 +221,7 @@
             #gp-task h1 {
                 font-size: 1.5rem;
             }
-            #gp-task-answers button {
+            #gp-task-answers .gp-task-answer {
                 font-size: 1rem;
             }
         }
@@ -305,8 +308,35 @@
     </script>
 
     <script type="text/html" id="tpl-task-answer">
-        <div class="col-6 mb-4" data-tpl-key="index" data-tpl-attr="data-index">
-            <button class="btn btn-block btn-xlg" data-tpl-key="answer"></button>
+        <div class="col-6 mb-4" data-tpl-key="answer" data-tpl-attr="data-answer">
+            <button class="btn btn-block btn-xlg gp-task-answer" data-tpl-key="answer"></button>
+        </div>
+    </script>
+
+    <script type="text/html" id="tpl-task-answer-input">
+        <div class="col-12">
+            <form class="input-group input-group-lg gp-task-answer-input">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Your answer is...</span>
+                </div>
+                <input type="text" class="form-control" maxlength="255" autocomplete="off"
+                       data-tpl-key="type" data-tpl-attr="type">
+                <div class="input-group-append">
+                    <button class="btn btn-info" type="submit">
+                        <i class="bi bi-check2-circle"></i> Submit
+                    </button>
+                </div>
+            </form>
+        </div>
+    </script>
+
+    <script type="text/html" id="tpl-task-answer-correct">
+        <div class="col-12">
+            <div class="alert alert-success text-center">
+                <h1 class="alert-heading display-3 m-4" data-tpl-key="answer"></h1>
+                <p data-tpl-key="flash_message"></p>
+            </div>
+            <ul class="list-inline mt-4" id="gp-task-answer-stats"></ul>
         </div>
     </script>
 
@@ -361,12 +391,23 @@
                             }
                         }
                     });
-                    this[append ? "append" : "html"]($block.html());
+                    if (!append) {
+                        this.empty();
+                    }
+                    const $element = $($block.html())
+                    this.append($element);
                     if (callback) {
-                        setTimeout(callback);
+                        setTimeout(() => callback($element));
                     }
                 }
             });
+
+            function formatAnswer(answer) {
+                if (!isNaN(answer) && !isNaN(parseFloat(answer))) {
+                    return (+answer).toLocaleString();
+                }
+                return answer;
+            }
 
             let ws;
             const wsSend = (type, data) => {
@@ -392,13 +433,17 @@
             $main.on("click", "#gp-controls-start", () => wsSend(3));  // wmtGameStarted
             $main.on("click", "#gp-controls-next", () => wsSend(4));  // wmtNextQuestion
             $main.on("click", "#gp-controls-finish", () => wsSend(9));  // wmtGameFinished
-            $main.on("click", "#gp-task-answers button", function() {
+            $main.on("click", "#gp-task-answers .gp-task-answer", function() {
                 const $this = $(this);
                 $this.addClass("js-clicked");
-                $("#gp-task-answers button").prop("disabled", true);
+                $("#gp-task-answers .gp-task-answer").prop("disabled", true);
+                wsSend(7, $this.parent().data("answer"));  // wmtAnswer
+            });
+            $main.on("submit", ".gp-task-answer-input", function(e) {
+                e.preventDefault();
 
-                const $index = $this.parent().data("index");
-                wsSend(7, $index); // wmtAnswer
+                $("input, button", this).prop("disabled", true);
+                wsSend(7, $("input").val());  // wmtAnswer
             });
 
             const $toasts = $("#toasts");
@@ -438,7 +483,6 @@
                 const ws = new WebSocket(url);
 
                 let numTasks;
-                let currentTaskIdx = 0;
                 let closing = false;
 
                 ws.onmessage = function(e) {
@@ -485,7 +529,7 @@
                                     }, null, true);
                                 }
 
-                                $("[data-name]", $leaderboard).filter(function () {
+                                $("[data-name]", $leaderboard).filter(function() {
                                     return $(this).data("name") === myself.name;
                                 }).css("background-color", "#f0f0f0");
 
@@ -520,7 +564,7 @@
                                 `<div class="text-warning"><i class="bi bi-person-x-fill"></i> ` +
                                 `${message.data.name} has disconnected :(</div>`);
 
-                            $("#gp-leaderboard [data-name]").filter(function () {
+                            $("#gp-leaderboard [data-name]").filter(function() {
                                 return $(this).data("name") === message.data.name;
                             }).remove();
                             updateLeaderboard();
@@ -535,22 +579,29 @@
                             });
                             break;
                         case 5:  // wmtTask
-                            currentTaskIdx = message.data.index;
-
                             $("#gp-task").template("task", {
-                                lead: `Question ${currentTaskIdx} of ${numTasks}`,
+                                lead: `Question ${message.data.index + 1} of ${numTasks}`,
                                 timer: `${message.data.time_to_answer} s`,
                                 question: message.data.question
                             }, () => {
-                                for (const [i, answer] of message.data.answers.entries()) {
-                                    $("#gp-task-answers").template("task-answer", {
-                                        index: i,
-                                        answer: answer
-                                    }, null, true);
+                                const $answers = $("#gp-task-answers");
+                                const nextTaskIndex = message.data.index + 1;
+
+                                switch (message.data.type) {
+                                case "quiz":
+                                    for (const answer of message.data.answers) {
+                                        $answers.template("task-answer", { answer }, null, true);
+                                    }
+                                    break;
+                                case "woc":
+                                    $answers.template("task-answer-input", { type: "number" }, $element => {
+                                        $("input", $element).focus();
+                                    });
                                 }
+
                                 $("#gp-task-timer").closest(".badge").removeAttr("hidden");
                                 $("#gp-controls-next").prop("disabled", true)
-                                    .children("span").text(currentTaskIdx >= numTasks - 1 ? "Last task" : "Next task");
+                                    .children("span").text(nextTaskIndex >= numTasks - 1 ? "Last task" : "Next task");
                             });
                             break;
                         case 6:  // wmtTimer
@@ -564,16 +615,39 @@
                             break;
                         case 8:  // wmtTaskFinished
                             $("#gp-task-timer").closest(".badge").remove();
-                            $("#gp-task-answers button").prop("disabled", true);
-                            $(`#gp-task-answers [data-index='${message.data.correct_answer_idx}'] button`)
-                                .addClass("js-correct");
 
-                            $("#gp-task-answers button.js-clicked:not(.js-correct)").addClass("js-incorrect");
+                            const stats = message.data.stats;
 
-                            const stats = message.data.answer_stats;
+                            switch (message.data.type) {
+                            case "quiz":
+                                $("#gp-task-answers .gp-task-answer").prop("disabled", true);
+                                $("#gp-task-answers [data-answer]").filter(function() {
+                                    return $(this).data("answer") === message.data.correct_answer;
+                                }).children(".gp-task-answer").addClass("js-correct");
+
+                                $("#gp-task-answers .gp-task-answer.js-clicked:not(.js-correct)")
+                                    .addClass("js-incorrect");
+                                break;
+                            case "woc":
+                                $("#gp-task-answers").template("task-answer-correct", {
+                                    answer: formatAnswer(message.data.correct_answer),
+                                    flash_message: message.data.flash_message,
+                                }, () => {
+                                    const stats = message.data.stats;
+                                    for (const answer of Object.keys(stats).reverse()) {
+                                        $("<li />", {
+                                            html: `${formatAnswer(answer)} ` +
+                                                `<span class="badge badge-info">${stats[answer]}</span>`,
+                                            class: "list-inline-item p-2 border border-info rounded-lg"
+                                        }).appendTo("#gp-task-answer-stats");
+                                    }
+                                });
+                            }
+
                             const total = Object.values(stats).reduce((a, b) => a + b, 0);
-                            $("#gp-task-answers button").html(function(index, html) {
-                                return `${html}<br><small>(${stats[index]} out of ${total})</small>`;
+                            $("#gp-task-answers .gp-task-answer").html(function(_, html) {
+                                const answer = $(this).parent().data("answer");
+                                return `${html}<br><small>(${stats[answer] || 0} out of ${total})</small>`;
                             });
 
                             for (const score of message.data.scores) {
@@ -590,7 +664,7 @@
                                 $player.data("score", score.score);
                             }
                             updateLeaderboard();
-                            if (currentTaskIdx < numTasks) {
+                            if (message.data.index < numTasks - 1) {
                                 $("#gp-controls-next").prop("disabled", false);
                             }
                             break;

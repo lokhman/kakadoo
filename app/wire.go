@@ -89,15 +89,25 @@ func wireReader(pool *Pool, player *Player) {
 							Data: timer,
 						},
 					}
-				}, func(gp *gameplay) {
+				}, func(gp *gameplay, task *Task) {
+					stats := make(map[string]int)
+					for _, answer := range gp.answers[gp.currentTaskIndex] {
+						if _, ok := stats[answer]; !ok {
+							stats[answer] = 0
+						}
+						stats[answer]++
+					}
 					pool.broadcast <- &broadcastMessage{
 						Game: player.Game,
 						Message: &wireMessage{
 							Type: wmtTaskFinished,
 							Data: map[string]interface{}{
-								"correct_answer_idx": task.correctAnswerIdx(),
-								"answer_stats":       gp.currentAnswerStats,
-								"scores":             gp.scores.Leaderboard(),
+								"index":          gp.currentTaskIndex,
+								"type":           task.Type,
+								"correct_answer": task.CorrectAnswer,
+								"stats":          stats,
+								"scores":         gp.scores.Leaderboard(),
+								"flash_message":  gp.flashMessage,
 							},
 						},
 					}
@@ -108,10 +118,11 @@ func wireReader(pool *Pool, player *Player) {
 						Message: &wireMessage{
 							Type: wmtTask,
 							Data: map[string]interface{}{
-								"index":          player.gameplay.currentTaskIdx + 1,
-								"question":       task.question(),
-								"answers":        task.answers(),
-								"time_to_answer": task.timeToAnswer() / time.Second,
+								"index":          player.gameplay.currentTaskIndex,
+								"type":           task.Type,
+								"question":       task.Question,
+								"answers":        task.Answers,
+								"time_to_answer": task.TimeToAnswer,
 							},
 						},
 					}
@@ -130,14 +141,8 @@ func wireReader(pool *Pool, player *Player) {
 
 		switch wm.Type {
 		case wmtAnswer:
-			if idx, ok := wm.Data.(float64); ok {
-				score := player.gameplay.Answer(player, int(idx))
-				if score >= 0 {
-					player.send <- &wireMessage{
-						Type: wmtAnswer,
-						Data: score,
-					}
-				}
+			if answer, ok := wm.Data.(string); ok {
+				player.gameplay.Answer(player, answer)
 			}
 		}
 	}
