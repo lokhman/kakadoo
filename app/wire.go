@@ -103,7 +103,6 @@ func wireReader(pool *Pool, player *Player) {
 							Type: wmtTaskFinished,
 							Data: map[string]interface{}{
 								"index":          gp.currentTaskIndex,
-								"type":           task.Type,
 								"correct_answer": task.CorrectAnswer,
 								"stats":          stats,
 								"scores":         gp.scores.Leaderboard(),
@@ -119,7 +118,6 @@ func wireReader(pool *Pool, player *Player) {
 							Type: wmtTask,
 							Data: map[string]interface{}{
 								"index":          player.gameplay.currentTaskIndex,
-								"type":           task.Type,
 								"question":       task.Question,
 								"answers":        task.Answers,
 								"time_to_answer": task.TimeToAnswer,

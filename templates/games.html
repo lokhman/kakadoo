@@ -12,7 +12,10 @@
 
     <ul class="mt-4">
         {{ range $game := . }}
-            <li><a href="{{ $game.URL }}">{{ $game.Title }}</a></li>
+            <li>
+                <span class="badge badge-primary">{{ $game.Type }}</span>
+                <a href="{{ $game.URL }}">{{ $game.Title }}</a>
+            </li>
         {{ end }}
     </ul>
 </main>

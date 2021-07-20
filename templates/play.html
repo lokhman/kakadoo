@@ -482,6 +482,7 @@
             function wire(url) {
                 const ws = new WebSocket(url);
 
+                let gameType;
                 let numTasks;
                 let closing = false;
 
@@ -516,6 +517,7 @@
                                         "Wait for the next task to start ;)"
                                 });
 
+                                gameType = message.data.gp_type;
                                 numTasks = message.data.gp_num_tasks;
 
                                 const $leaderboard = $("#gp-leaderboard");
@@ -587,7 +589,7 @@
                                 const $answers = $("#gp-task-answers");
                                 const nextTaskIndex = message.data.index + 1;
 
-                                switch (message.data.type) {
+                                switch (gameType) {
                                 case "quiz":
                                     for (const answer of message.data.answers) {
                                         $answers.template("task-answer", { answer }, null, true);
@@ -617,8 +619,7 @@
                             $("#gp-task-timer").closest(".badge").remove();
 
                             const stats = message.data.stats;
-
-                            switch (message.data.type) {
+                            switch (gameType) {
                             case "quiz":
                                 $("#gp-task-answers .gp-task-answer").prop("disabled", true);
                                 $("#gp-task-answers [data-answer]").filter(function() {

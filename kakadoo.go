@@ -39,6 +39,7 @@ func getRouter(pool *app.Pool) *gin.Engine {
 	r.GET("/games", func(c *gin.Context) {
 		type Game struct {
 			ID    string `json:"id"`
+			Type  string `json:"type"`
 			Title string `json:"title"`
 			URL   string `json:"url"`
 		}
@@ -49,6 +50,7 @@ func getRouter(pool *app.Pool) *gin.Engine {
 			id := app.GameHashID.Encode(game.ID)
 			ctx[i] = Game{
 				ID:    id,
+				Type:  game.Type,
 				Title: game.Title,
 				URL:   fmt.Sprintf("/play/%s", id),
 			}

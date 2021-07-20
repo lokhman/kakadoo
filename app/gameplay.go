@@ -22,6 +22,7 @@ const correctAnswerBaseScore = 15_000
 
 type gameplay struct {
 	currentTaskIndex int
+	gameType         string
 	tasks            []*Task
 	answers          gpAnswers
 	scores           gpScores
@@ -105,7 +106,7 @@ func (gp *gameplay) calculateScores(task *Task) {
 		return
 	}
 
-	if task.Type == taskQuiz {
+	if gp.gameType == gameTypeQuiz {
 		for player, answer := range answers {
 			scores := gp.scores[player]
 			if answer == task.CorrectAnswer {
@@ -113,7 +114,7 @@ func (gp *gameplay) calculateScores(task *Task) {
 				scores[gp.currentTaskIndex] = baseScore + float64(gp.deadline.Sub(time.Now()).Milliseconds())
 			}
 		}
-	} else if task.Type == taskWoC {
+	} else if gp.gameType == gameTypeWoC {
 		correctAnswer, err := strconv.ParseFloat(task.CorrectAnswer, 64)
 		if err != nil {
 			panic(err)
@@ -206,10 +207,11 @@ func (gp *gameplay) Finish() gpScores {
 func newGameplay(game *Game) *gameplay {
 	tasks := game.GetTasks()
 	return &gameplay{
-		tasks:   tasks,
-		answers: make(gpAnswers, len(tasks)),
-		scores:  make(gpScores),
-		state:   gpsReady,
+		gameType: game.Type,
+		tasks:    tasks,
+		answers:  make(gpAnswers, len(tasks)),
+		scores:   make(gpScores),
+		state:    gpsReady,
 	}
 }
 

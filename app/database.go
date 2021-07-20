@@ -25,13 +25,12 @@ func init() {
 }
 
 const (
-	taskQuiz = "quiz"
-	taskWoC  = "woc"
+	gameTypeQuiz = "quiz"
+	gameTypeWoC  = "woc"
 )
 
 type Task struct {
 	ID            int
-	Type          string
 	Question      string
 	Answers       pq.StringArray
 	CorrectAnswer string
@@ -44,13 +43,14 @@ func (t *Task) timeToAnswer() time.Duration {
 
 type Game struct {
 	ID        int
+	Type      string
 	Title     string
 	Author    string
 	IsStarted bool
 }
 
 func (g *Game) GetTasks() []*Task {
-	q := QB.Select("id", "type", "question", "answers", "correct_answer", "time_to_answer").
+	q := QB.Select("id", "question", "answers", "correct_answer", "time_to_answer").
 		From("tasks").Where("game_id = ?", g.ID).OrderBy("id")
 	rows, err := q.Query()
 	defer func() { _ = rows.Close() }()
@@ -58,7 +58,7 @@ func (g *Game) GetTasks() []*Task {
 	tasks := make([]*Task, 0)
 	for rows.Next() {
 		task := &Task{}
-		err = rows.Scan(&task.ID, &task.Type, &task.Question, &task.Answers, &task.CorrectAnswer, &task.TimeToAnswer)
+		err = rows.Scan(&task.ID, &task.Question, &task.Answers, &task.CorrectAnswer, &task.TimeToAnswer)
 		if err != nil {
 			panic(err)
 		}
@@ -71,14 +71,14 @@ func (g *Game) GetTasks() []*Task {
 }
 
 func GetGames() []*Game {
-	q := QB.Select("id", "title", "author").From("games").OrderBy("created_at")
+	q := QB.Select("id", "type", "title", "author").From("games").OrderBy("created_at DESC")
 	rows, err := q.Query()
 	defer func() { _ = rows.Close() }()
 
 	games := make([]*Game, 0)
 	for rows.Next() {
 		game := &Game{}
-		err = rows.Scan(&game.ID, &game.Title, &game.Author)
+		err = rows.Scan(&game.ID, &game.Type, &game.Title, &game.Author)
 		if err != nil {
 			panic(err)
 		}
@@ -97,8 +97,8 @@ func GetGameByHash(hash string) *Game {
 	}
 
 	game := &Game{ID: id}
-	q := QB.Select("title", "author").From("games").Where("id = ?", id)
-	if err := q.Scan(&game.Title, &game.Author); err != nil {
+	q := QB.Select("type", "title", "author").From("games").Where("id = ?", id)
+	if err := q.Scan(&game.Type, &game.Title, &game.Author); err != nil {
 		if err == sql.ErrNoRows {
 			return nil
 		}

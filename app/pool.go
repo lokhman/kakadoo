@@ -88,6 +88,7 @@ func (p *Pool) Run() {
 				Data: map[string]interface{}{
 					"name":         player.Name,
 					"players":      players,
+					"gp_type":      gp.gameType,
 					"gp_state":     gp.state,
 					"gp_num_tasks": len(gp.tasks),
 				},
