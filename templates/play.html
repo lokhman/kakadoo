@@ -334,7 +334,6 @@
         <div class="col-12">
             <div class="alert alert-success text-center">
                 <h1 class="alert-heading display-3 m-4" data-tpl-key="answer"></h1>
-                <p data-tpl-key="flash_message"></p>
             </div>
             <ul class="list-inline mt-4" id="gp-task-answer-stats"></ul>
         </div>
@@ -632,7 +631,6 @@
                             case "woc":
                                 $("#gp-task-answers").template("task-answer-correct", {
                                     answer: formatAnswer(message.data.correct_answer),
-                                    flash_message: message.data.flash_message,
                                 }, () => {
                                     const stats = message.data.stats;
                                     for (const answer of Object.keys(stats).reverse()) {

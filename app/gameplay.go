@@ -32,7 +32,6 @@ type gameplay struct {
 	answers          gpAnswers
 	scores           gpScores
 	state            gpState
-	flashMessage     string
 	deadline         time.Time
 	mu               sync.Mutex
 }
@@ -100,7 +99,6 @@ func (gp *gameplay) NextTask(tick func(int), callback func(gp *gameplay, task *T
 
 		gp.state = gpsStarted
 		gp.currentTaskIndex++
-		gp.flashMessage = ""
 	}()
 
 	return task
@@ -186,7 +184,6 @@ func (gp *gameplay) calculateScores(task *Task) {
 			value:  medianValue,
 			player: medianPlayer,
 		})
-		// gp.flashMessage = fmt.Sprintf("Mean: %.2f | Median: %.2f", meanValue, medianValue)
 
 		for _, score := range scores {
 			value := score.value
