@@ -106,3 +106,23 @@ func GetGameByHash(hash string) *Game {
 	}
 	return game
 }
+
+type Score struct {
+	Game      *Game
+	Task      *Task
+	Player    string
+	Question  string
+	Answer    string
+	Score     float64
+	CreatedAt time.Time
+}
+
+func InsertScores(scores ...*Score) {
+	q := QB.Insert("scores").Columns("game_id", "task_id", "player", "question", "answer", "score", "created_at")
+	for _, sc := range scores {
+		q = q.Values(sc.Game.ID, sc.Task.ID, sc.Player, sc.Question, sc.Answer, sc.Score, sc.CreatedAt)
+	}
+	if _, err := q.Exec(); err != nil {
+		panic(err)
+	}
+}

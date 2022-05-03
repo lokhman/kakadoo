@@ -92,10 +92,10 @@ func wireReader(pool *Pool, player *Player) {
 				}, func(gp *gameplay, task *Task) {
 					stats := make(map[string]int)
 					for _, answer := range gp.answers[gp.currentTaskIndex] {
-						if _, ok := stats[answer]; !ok {
-							stats[answer] = 0
+						if _, ok := stats[answer.answer]; !ok {
+							stats[answer.answer] = 0
 						}
-						stats[answer]++
+						stats[answer.answer]++
 					}
 					pool.broadcast <- &broadcastMessage{
 						Game: player.Game,

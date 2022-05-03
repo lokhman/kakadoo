@@ -80,7 +80,7 @@ func (gp *gameplay) NextTask(tick func(int), callback func(gp *gameplay, task *T
 
 	task := gp.tasks[gp.currentTaskIndex]
 
-	gp.answers[gp.currentTaskIndex] = make(map[*Player]string)
+	gp.answers[gp.currentTaskIndex] = make(map[*Player]gpAnswer)
 	gp.deadline = time.Now().Add(task.timeToAnswer())
 	gp.state = gpsAccepting
 
@@ -113,7 +113,10 @@ func (gp *gameplay) Answer(player *Player, answer string) {
 	}
 	answers := gp.answers[gp.currentTaskIndex]
 	if _, ok := answers[player]; !ok {
-		answers[player] = answer
+		answers[player] = gpAnswer{
+			answer: answer,
+			time:   time.Now(),
+		}
 	}
 }
 
@@ -126,9 +129,9 @@ func (gp *gameplay) calculateScores(task *Task) {
 	if gp.gameType == gameTypeQuiz {
 		for player, answer := range answers {
 			scores := gp.scores[player]
-			if answer == task.CorrectAnswer {
+			if answer.answer == task.CorrectAnswer {
 				baseScore := correctAnswerBaseScore * (1 / math.Max(float64(task.TimeToAnswer), 1))
-				scores[gp.currentTaskIndex] = baseScore + float64(gp.deadline.Sub(time.Now()).Milliseconds())
+				scores[gp.currentTaskIndex] = baseScore + float64(gp.deadline.Sub(answer.time).Milliseconds())
 			}
 		}
 	} else if gp.gameType == gameTypeWoC {
@@ -147,7 +150,7 @@ func (gp *gameplay) calculateScores(task *Task) {
 		scores := make([]*wocScore, 0)
 
 		for player, answer := range answers {
-			if answer, err := strconv.ParseFloat(answer, 64); err == nil {
+			if answer, err := strconv.ParseFloat(answer.answer, 64); err == nil {
 				scores = append(scores, &wocScore{
 					player: player,
 					value:  answer,
@@ -222,6 +225,22 @@ func (gp *gameplay) calculateScores(task *Task) {
 			}
 		}
 	}
+
+	i := 0
+	scores := make([]*Score, len(answers))
+	for player, answer := range answers {
+		scores[i] = &Score{
+			Game:      player.Game,
+			Task:      task,
+			Player:    player.Name,
+			Question:  task.Question,
+			Answer:    answer.answer,
+			Score:     gp.scores[player][gp.currentTaskIndex],
+			CreatedAt: answer.time,
+		}
+		i++
+	}
+	InsertScores(scores...)
 }
 
 func (gp *gameplay) Finish() gpScores {
@@ -243,7 +262,12 @@ func newGameplay(game *Game) *gameplay {
 	}
 }
 
-type gpAnswers []map[*Player]string
+type gpAnswer struct {
+	answer string
+	time   time.Time
+}
+
+type gpAnswers []map[*Player]gpAnswer
 
 type gpScores map[*Player][]float64
 
