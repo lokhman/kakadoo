@@ -1,0 +1,65 @@
+{{ define "styles" }}
+<style>
+    body {
+        display: block;
+    }
+    main {
+        max-width: 1200px;
+        margin: auto;
+    }
+</style>
+{{ end }}
+
+{{ define "content" }}
+<main>
+    <h1 class="display-4">
+        {{ .game.Title }}
+        <span class="badge badge-info float-right" id="timer" style="font-size: 2rem;"></span>
+    </h1>
+    <table class="table table-bordered">
+        <thead class="thead-light">
+        <tr>
+            <th>#</th>
+            <th>Player</th>
+            <th>Score</th>
+            <th>Completed</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{ range $index, $score := .scores }}
+            <tr>
+                <td><strong>{{ add $index 1 }}</strong></td>
+                <td><em>{{ $score.Player }}</em></td>
+                <td>{{ $score.Score }}</td>
+                <td>{{ $score.Completed }}%</td>
+            </tr>
+        {{ end }}
+        </tbody>
+    </table>
+</main>
+{{ end }}
+
+{{ define "scripts" }}
+<script>
+    (function($) {
+        const $tbody = $("table tbody");
+        const $timer = $("#timer");
+        const dtFormat = new Intl.DateTimeFormat("en-GB", {
+            timeStyle: "medium",
+            timeZone: "UTC"
+        });
+
+        setInterval(function() {
+            {{ if .game.LastStartedAt }}
+                const startedAt = new Date("{{ .game.LastStartedAt.Format "2006-01-02T15:04:05" }}");
+                $timer.text(dtFormat.format(new Date() - startedAt));
+            {{ end }}
+            $tbody.load(`${window.location.href} table tbody > *`, function() {
+                if (!$timer.text() && $tbody.children().length > 0) {
+                    window.location.reload();
+                }
+            });
+        }, 1000);
+    })(jQuery);
+</script>
+{{ end }}

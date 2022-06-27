@@ -25,8 +25,9 @@ func init() {
 }
 
 const (
-	gameTypeQuiz = "quiz"
-	gameTypeWoC  = "woc"
+	GameTypeQuiz    = "quiz"
+	GameTypeWoC     = "woc"
+	GameTypeFindCat = "find_cat"
 )
 
 type Task struct {
@@ -42,11 +43,12 @@ func (t *Task) timeToAnswer() time.Duration {
 }
 
 type Game struct {
-	ID        int
-	Type      string
-	Title     string
-	Author    string
-	IsStarted bool
+	ID            int
+	Type          string
+	Title         string
+	Author        string
+	IsStarted     bool
+	LastStartedAt *time.Time
 }
 
 func (g *Game) GetTasks() []*Task {
@@ -71,7 +73,7 @@ func (g *Game) GetTasks() []*Task {
 }
 
 func GetGames() []*Game {
-	q := QB.Select("id", "type", "title", "author").From("games").OrderBy("created_at DESC")
+	q := QB.Select("id", "type", "title", "author").From("games").OrderBy("created_at")
 	rows, err := q.Query()
 	defer func() { _ = rows.Close() }()
 
@@ -97,8 +99,8 @@ func GetGameByHash(hash string) *Game {
 	}
 
 	game := &Game{ID: id}
-	q := QB.Select("type", "title", "author").From("games").Where("id = ?", id)
-	if err := q.Scan(&game.Type, &game.Title, &game.Author); err != nil {
+	q := QB.Select("type", "title", "author", "last_started_at").From("games").Where("id = ?", id)
+	if err := q.Scan(&game.Type, &game.Title, &game.Author, &game.LastStartedAt); err != nil {
 		if err == sql.ErrNoRows {
 			return nil
 		}
@@ -107,10 +109,18 @@ func GetGameByHash(hash string) *Game {
 	return game
 }
 
+func UpdateGameStartedAt(game *Game, startedAt time.Time) {
+	q := QB.Update("games").Set("last_started_at", startedAt).Where("id = ?", game.ID)
+	if _, err := q.Exec(); err != nil {
+		panic(err)
+	}
+}
+
 type Score struct {
 	Game      *Game
 	Task      *Task
 	Player    string
+	PlayerKey string
 	Question  string
 	Answer    string
 	Score     float64
@@ -118,11 +128,49 @@ type Score struct {
 }
 
 func InsertScores(scores ...*Score) {
-	q := QB.Insert("scores").Columns("game_id", "task_id", "player", "question", "answer", "score", "created_at")
+	q := QB.Insert("scores").
+		Columns("game_id", "task_id", "player", "player_key", "question", "answer", "score", "created_at")
 	for _, sc := range scores {
-		q = q.Values(sc.Game.ID, sc.Task.ID, sc.Player, sc.Question, sc.Answer, sc.Score, sc.CreatedAt)
+		q = q.Values(sc.Game.ID, sc.Task.ID, sc.Player, sc.PlayerKey, sc.Question, sc.Answer, sc.Score, sc.CreatedAt)
 	}
 	if _, err := q.Exec(); err != nil {
 		panic(err)
 	}
+}
+
+type _dbScore struct {
+	Player    string  `json:"player"`
+	Score     float64 `json:"score"`
+	Completed int     `json:"completed"`
+}
+
+func GetScores(game *Game) []_dbScore {
+	scores := make([]_dbScore, 0)
+	q := QB.Select("s.player", "SUM(s.score)",
+		"COUNT(s.id) * 100 / (SELECT COUNT(t.*) FROM tasks t WHERE t.game_id = g.id) completed").
+		From("scores s").Join("games g ON s.game_id = g.id").
+		Where("s.game_id = ? AND s.created_at >= g.last_started_at", game.ID).
+		GroupBy("g.id", "s.player").OrderBy("SUM(s.score) DESC", "completed", "MAX(s.created_at)")
+	rows, err := q.Query()
+	defer func() { _ = rows.Close() }()
+	for rows.Next() {
+		score := _dbScore{}
+		err = rows.Scan(&score.Player, &score.Score, &score.Completed)
+		if err != nil {
+			panic(err)
+		}
+		scores = append(scores, score)
+	}
+	return scores
+}
+
+func HasPlayerInScores(game *Game, player string, playerKey string) bool {
+	var result bool
+	q := QB.Select("s.id").Prefix("SELECT EXISTS(").From("scores s").Join("games g ON s.game_id = g.id").
+		Where("s.game_id = ? AND s.player = ? AND s.player_key <> ?", game.ID, player, playerKey).
+		Where("s.created_at >= g.last_started_at").Suffix(")")
+	if err := q.Scan(&result); err != nil {
+		panic(err)
+	}
+	return result
 }

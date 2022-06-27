@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 
@@ -24,6 +26,18 @@ func getRouter(pool *app.Pool) *gin.Engine {
 	renderer.AddFromFiles("index", "templates/index.html")
 	renderer.AddFromFiles("games", "templates/index.html", "templates/games.html")
 	renderer.AddFromFiles("play", "templates/index.html", "templates/play.html")
+	renderer.AddFromFiles("find_cat", "templates/index.html", "templates/find_cat.html")
+	renderer.AddFromFilesFuncs("podium", template.FuncMap{
+		"json": func(v interface{}) template.JS {
+			bytes, _ := json.Marshal(v)
+			return template.JS(bytes)
+		},
+	}, "templates/index.html", "templates/podium.html")
+	renderer.AddFromFilesFuncs("scores", template.FuncMap{
+		"add": func(v int, i int) int {
+			return v + i
+		},
+	}, "templates/index.html", "templates/scores.html")
 	r.HTMLRender = renderer
 
 	r.Static("/static", "./static/")
@@ -59,20 +73,33 @@ func getRouter(pool *app.Pool) *gin.Engine {
 	})
 
 	rp := r.Group("/play/:id", func(c *gin.Context) {
-		game := app.GetGameByHash(c.Param("id"))
-		if game == nil {
-			c.Redirect(http.StatusTemporaryRedirect, "/")
-			c.Abort()
+		if game := app.GetGameByHash(c.Param("id")); game != nil {
+			c.Set("game", game)
 			return
 		}
-		c.Set("game", game)
+		c.Redirect(http.StatusTemporaryRedirect, "/")
+		c.Abort()
 	})
 	rp.GET("", func(c *gin.Context) {
 		game := c.MustGet("game").(*app.Game)
-		c.HTML(http.StatusOK, "play", gin.H{
-			"title":   game.Title,
-			"wireURL": c.Request.URL.Path + "/wire",
-		})
+		switch game.Type {
+		case app.GameTypeFindCat:
+			app.FindCat(c)
+		default:
+			c.HTML(http.StatusOK, "play", gin.H{
+				"title":   game.Title,
+				"wireURL": c.Request.URL.Path + "/wire",
+			})
+		}
+	})
+	rp.POST("", func(c *gin.Context) {
+		game := c.MustGet("game").(*app.Game)
+		switch game.Type {
+		case app.GameTypeFindCat:
+			app.FindCat(c)
+		default:
+			c.AbortWithStatus(http.StatusMethodNotAllowed)
+		}
 	})
 	rp.GET("/wire", func(c *gin.Context) {
 		game := c.MustGet("game").(*app.Game)
@@ -88,6 +115,13 @@ func getRouter(pool *app.Pool) *gin.Engine {
 			player.IsAuthor = true
 		}
 		app.WireHandler(pool, player, c.Writer, c.Request)
+	})
+	rp.GET("/scores", func(c *gin.Context) {
+		game := c.MustGet("game").(*app.Game)
+		c.HTML(http.StatusOK, "scores", gin.H{
+			"game":   game,
+			"scores": app.GetScores(game),
+		})
 	})
 	return r
 }

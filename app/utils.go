@@ -1,7 +1,9 @@
 package app
 
 import (
+	"math/rand"
 	"strings"
+	"time"
 	"unicode/utf8"
 )
 
@@ -32,4 +34,18 @@ func StripHtmlTags(s string) string {
 		end = i + 1
 	}
 	return builder.String()
+}
+
+func init() {
+	rand.Seed(time.Now().Unix())
+}
+
+var _randStringRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+func RandString(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = _randStringRunes[rand.Intn(len(_randStringRunes))]
+	}
+	return string(b)
 }

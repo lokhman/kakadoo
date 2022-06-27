@@ -1,0 +1,306 @@
+{{ define "styles" }}
+<style>
+    main {
+        width: inherit;
+        height: inherit;
+    }
+    .form-label-group {
+        position: relative;
+        margin-bottom: 1rem;
+    }
+    .form-label-group > input,
+    .form-label-group > label {
+        height: 3.125rem;
+        padding: .75rem;
+    }
+    .form-label-group > label {
+        position: absolute;
+        top: 0;
+        left: 0;
+        display: block;
+        width: 100%;
+        margin-bottom: 0;
+        line-height: 1.5;
+        color: #495057;
+        pointer-events: none;
+        cursor: text;
+        border: 1px solid transparent;
+        border-radius: .25rem;
+        transition: all .1s ease-in-out;
+    }
+    .form-label-group input::-webkit-input-placeholder,
+    .form-label-group input:-ms-input-placeholder,
+    .form-label-group input::-ms-input-placeholder,
+    .form-label-group input::-moz-placeholder,
+    .form-label-group input::placeholder {
+        color: transparent;
+    }
+    .form-label-group input:not(:placeholder-shown) {
+        padding-top: 1.25rem;
+        padding-bottom: .25rem;
+    }
+    .form-label-group input:not(:placeholder-shown) ~ label {
+        padding-top: .25rem;
+        padding-bottom: .25rem;
+        font-size: 12px;
+        color: #777;
+    }
+    #form-enter {
+        max-width: 286px;
+        padding: 15px;
+        margin: auto;
+    }
+    #form-enter img {
+        width: 100%;
+        height: auto;
+    }
+    #find-cat {
+        height: inherit;
+    }
+    #find-cat-container {
+        position: relative;
+        width: fit-content;
+        height: inherit;
+        margin: auto;
+    }
+    #find-cat-container img {
+        width: 100%;
+        height: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        cursor: pointer;
+    }
+    #find-cat-container .axe-x,
+    #find-cat-container .axe-y {
+        display: none;
+        position: absolute;
+        top: 0;
+        background-color: #fff;
+        pointer-events: none;
+    }
+    #find-cat-container .axe-x {
+        width: 1px;
+        height: 100%;
+    }
+    #find-cat-container .axe-y {
+        width: 100%;
+        height: 1px;
+    }
+    #find-cat-container .pin {
+        display: none;
+        position: absolute;
+        width: 32px;
+        height: 32px;
+        background-image: url(data:image/png;base64,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);
+        background-size: cover;
+        filter: drop-shadow(1px 4px 3px rgba(0, 0, 0, 0.5));
+        pointer-events: none;
+    }
+    #find-cat-container .answer {
+        display: none;
+        position: absolute;
+        border: 3px solid;
+    }
+    #find-cat-controls {
+        display: none;
+        position: fixed;
+        right: 15px;
+        bottom: 15px;
+    }
+    #find-cat-controls::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+    }
+    #find-cat-controls form {
+        position: relative;
+        width: 300px;
+        padding: 20px;
+        margin: auto;
+        background-color: #fff;
+        border: 1px solid #000;
+        border-radius: 5px;
+    }
+    #find-cat-controls img {
+        width: 70%;
+    }
+    #find-cat-controls.no-reset .row > div:first-child {
+        display: none;
+    }
+    #find-cat-counter {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        min-width: 60px;
+        border: 1px solid #000;
+        border-radius: 5px;
+        background-color: #fff;
+        padding: 10px;
+        text-align: center;
+        opacity: 0.5;
+        pointer-events: none;
+    }
+</style>
+{{ end }}
+
+{{ define "content" }}
+<main>
+    {{ if eq .form.Player "" }}
+        <div style="display: flex; height: inherit; align-items: center">
+            <form id="form-enter">
+                <div class="text-center mb-4">
+                    <img class="mb-4" src="/static/find-cat.png" alt="">
+                </div>
+                {{ if .form.ErrorPlayer }}
+                    <div class="alert alert-danger small">
+                        This name is already taken :(
+                    </div>
+                {{ end }}
+                <div class="form-label-group">
+                    <input type="text" class="form-control" id="form-enter-player" name="p"
+                           placeholder="Enter your name" maxlength="32" required autofocus autocomplete="off">
+                    <label for="form-enter-player">Enter your name</label>
+                </div>
+                <button class="btn btn-lg btn-dark btn-block" type="submit" disabled>Go!</button>
+            </form>
+        </div>
+    {{ else }}
+        <div id="find-cat">
+            <div id="find-cat-container">
+                <img src="{{ .task.Question }}" alt="Find a cat!"
+                     {{ if ne .form.Answer "" }}
+                        data-answer="[{{ .form.Answer }}]"
+                        data-correct-answer="[{{ .task.CorrectAnswer }}]"
+                    {{ end }}>
+                <i class="axe-x"></i><i class="axe-y"></i>
+                <i class="pin"></i>
+                <i class="answer"></i>
+            </div>
+        </div>
+        <div id="find-cat-controls">
+            <form method="POST">
+                <div class="text-center mb-4">
+                    <img src="/static/find-cat-smile.png" alt=""
+                         data-smile="/static/find-cat-smile.png"
+                         data-happy="/static/find-cat-happy.png"
+                         data-sad="/static/find-cat-sad.png">
+                </div>
+                <div class="container">
+                    <div class="row">
+                        <div class="col px-1">
+                            <button class="btn btn-outline-danger btn-block" type="button" id="find-cat-controls-reset">
+                                <i class="bi bi-x-circle"></i> Reset
+                            </button>
+                        </div>
+                        <div class="col px-1">
+                            <button class="btn btn-success btn-block" type="submit">
+                                Continue <i class="bi bi-arrow-right-circle"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {{ range $answer := .form.Answers }}
+                    <input type="hidden" name="w" value="{{ $answer }}">
+                {{ end }}
+                {{ if ne .form.Answer "" }}
+                    <input type="hidden" name="w" value="{{ .form.Answer }}">
+                {{ end }}
+            </form>
+        </div>
+        <div id="find-cat-counter">{{ .counter }}</div>
+    {{ end }}
+</main>
+{{ end }}
+
+{{ define "scripts" }}
+<script>
+    (function($) {
+        $("#form-enter-player").on("keyup", function() {
+            $("#form-enter :submit").prop("disabled", !this.value);
+        });
+
+        const $findCatContainer = $("#find-cat-container");
+        const $findCatControls = $("#find-cat-controls");
+        const $findCatImage = $("img", $findCatContainer);
+        const $findCatControlsImage = $("img", $findCatControls);
+        const $axeX = $(".axe-x", $findCatContainer);
+        const $axeY = $(".axe-y", $findCatContainer);
+        const $pin = $(".pin", $findCatContainer);
+        const $answer = $(".answer", $findCatContainer);
+
+        function getScaledXY(x, y, down) {
+            const width = $findCatImage.width();
+            const height = $findCatImage.height();
+            const naturalWidth = $findCatImage.prop("naturalWidth");
+            const naturalHeight = $findCatImage.prop("naturalHeight");
+            if (down) {
+                return [x * width / naturalWidth, y * height / naturalHeight];
+            } else {
+                return [x * naturalWidth / width, y * naturalHeight / height];
+            }
+        }
+
+        $findCatImage.not("[data-answer]").on({
+            mouseenter: function() {
+                $axeX.add($axeY).show();
+            },
+            mousemove: function(e) {
+                const rect = e.target.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                $axeX.css("left", x);
+                $axeY.css("top", y);
+                $findCatImage.data("pin", [x, y]);
+            },
+            mouseleave: function() {
+                $axeX.add($axeY).hide();
+            },
+            click: function() {
+                const [x, y] = $findCatImage.data("pin");
+                $pin.css({left: x, top: y - 32}).show();
+                $findCatControlsImage.prop("src", $findCatControlsImage.data("smile"));
+                $findCatControls.removeClass("no-reset").fadeIn();
+            }
+        });
+        $("#find-cat-controls-reset").on("click", function() {
+            $pin.hide();
+            $findCatControls.hide();
+        });
+        $("form", $findCatControls).on("submit", function() {
+            const [x, y] = $findCatImage.data("pin");
+            const [naturalX, naturalY] = getScaledXY(x, y);
+            const value = `${naturalX.toFixed()},${naturalY.toFixed()}`
+            $("<input />", {attr: {type: "hidden", name: "v"}}).val(value).appendTo(this);
+        });
+
+        $findCatImage.filter("[data-answer]").one("load", function() {
+            let [x, y] = $findCatImage.data("answer");
+            let [x1, y1, x2, y2] = $findCatImage.data("correct-answer");
+            const correct = x >= x1 && x <= x2 && y >= y1 && y <= y2;
+            [x1, y1] = getScaledXY(x1, y1, true);
+            [x2, y2] = getScaledXY(x2, y2, true);
+            $answer.css({
+                left: x1,
+                top: y1,
+                width: x2 - x1,
+                height: y2 - y1,
+                borderColor: correct ? "#0f0" : "#f00"
+            }).show();
+            $findCatControlsImage.prop("src",
+                correct ? $findCatControlsImage.data("happy") : $findCatControlsImage.data("sad"));
+            $findCatControls.addClass("no-reset").show();
+        }).each(function() {
+            if (this.complete) {
+                $findCatImage.trigger("load");
+            }
+        });
+
+        $(window).on("resize", function() {
+            $pin.add($answer).hide();  // lazy messing with math
+        });
+    })(jQuery);
+</script>
+{{ end }}

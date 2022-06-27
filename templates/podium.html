@@ -1,0 +1,139 @@
+{{ define "styles" }}
+<style>
+    body {
+        overflow: hidden;
+    }
+    main {
+        width: inherit;
+        height: inherit;
+    }
+    main > div {
+        height: inherit;
+        align-content: center;
+    }
+    #podium {
+        align-items: flex-end;
+    }
+    #podium > div {
+        overflow: hidden;
+        padding-top: 12px;
+        text-overflow: ellipsis;
+        letter-spacing: 0.1rem;
+        font-weight: bold;
+        transition: color 1s ease-in, height 1s ease-in;
+    }
+    #podium.init > div {
+        color: rgba(255, 255, 255, 0);
+        height: 50px;
+    }
+    #podium > :nth-child(1) {
+        height: 100px;
+    }
+    #podium > :nth-child(2) {
+        height: 125px;
+    }
+    #podium > :nth-child(3) {
+        height: 75px;
+    }
+    .fw::before, .fw::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        box-shadow: 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff,
+        0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff,
+        0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff,
+        0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff,
+        0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff, 0 0 #fff,
+        0 0 #fff, 0 0 #fff;
+        animation: 1s fw-bang ease-out infinite backwards, 1s fw-gravity ease-in infinite backwards,
+        5s fw-position linear infinite backwards;
+    }
+    .fw::after {
+        animation-delay: 1.25s, 1.25s, 1.25s;
+        animation-duration: 1.25s, 1.25s, 6.25s;
+    }
+    @keyframes fw-bang {
+        to {
+            box-shadow: -33px -327.6666666667px #00ffaa, 78px -373.6666666667px #ff4000,
+            151px -362.6666666667px #ffbf00, -234px -116.6666666667px #00ff99, -110px -63.6666666667px #00b7ff,
+            108px -280.6666666667px #3700ff, -238px -78.6666666667px #0051ff, 146px 72.3333333333px #59ff00,
+            76px -184.6666666667px #ff3700, -218px 56.3333333333px #ee00ff, 137px -161.6666666667px #004dff,
+            -142px -125.6666666667px #09ff00, -85px -165.6666666667px #0040ff, 113px 77.3333333333px #ff006f,
+            -169px -77.6666666667px #1100ff, 84px -227.6666666667px #73ff00, -140px -398.6666666667px #0066ff,
+            182px 50.3333333333px #ff0033, 145px 45.3333333333px #0055ff, 93px -383.6666666667px #ffae00,
+            -249px -381.6666666667px #00ffae, -26px -336.6666666667px #26ff00, -8px 46.3333333333px #0062ff,
+            -211px -176.6666666667px #fff700, 190px 61.3333333333px #00bbff, 33px -170.6666666667px #d000ff,
+            4px -67.6666666667px #00ff6f, -33px 70.3333333333px #00ff09, 136px -142.6666666667px #00ff1e,
+            -186px -71.6666666667px #00ff6f, -163px -245.6666666667px #bb00ff, -52px -350.6666666667px #fbff00,
+            81px -134.6666666667px #e600ff, -43px -76.6666666667px #00f7ff, -175px -262.6666666667px #00ff84,
+            -44px -409.6666666667px #00ffe1, -103px -289.6666666667px #a6ff00, -169px 57.3333333333px #ff0066,
+            2px -263.6666666667px #ff00bb, 140px -161.6666666667px #ffdd00, -95px -166.6666666667px #0088ff,
+            -133px -19.6666666667px #00ffaa, -187px -51.6666666667px #009dff, -123px -333.6666666667px #ff009d,
+            180px -5.6666666667px #33ff00, 19px -288.6666666667px #00f7ff, -9px -360.6666666667px #00b7ff,
+            -195px -80.6666666667px #51ff00, -218px -408.6666666667px #ff00aa, 56px -352.6666666667px #0026ff,
+            -154px -391.6666666667px #ff001e;
+        }
+    }
+    @keyframes fw-gravity {
+        to { transform: translateY(200px); opacity: 0; }
+    }
+    @keyframes fw-position {
+        0%, 19.9% { margin-top: 10%; margin-left: 40%; }
+        20%, 39.9% { margin-top: 40%; margin-left: 30%; }
+        40%, 59.9% { margin-top: 20%; margin-left: 70%; }
+        60%, 79.9% { margin-top: 30%; margin-left: 20%; }
+        80%, 99.9% { margin-top: 30%; margin-left: 80%; }
+    }
+</style>
+{{ end }}
+
+{{ define "content" }}
+<main>
+    <div class="row text-center justify-content-center">
+        <div class="col-md-8 col-lg-4 text-white">
+            <h1 class="display-4 mb-5">Thanks for playing!</h1>
+            <div class="row init" id="podium">
+                <div class="col-4 bg-warning" id="lb-second"></div>
+                <div class="col-4 bg-success" id="lb-first"></div>
+                <div class="col-4 bg-danger" id="lb-third"></div>
+            </div>
+            <p class="lead mt-4">
+                You scored <span id="lb-points">0</span>!<br>
+                <small id="lb-place"></small>
+            </p>
+        </div>
+    </div>
+    <div class="fw"></div>
+</main>
+{{ end }}
+
+{{ define "scripts" }}
+<script>
+    (function($) {
+        $("body").addClass("bg-dark");
+        $("#podium").removeClass("init");
+
+        const scores = {{ .scores | json }};
+        const suffix = (n) => ["", "st", "nd", "rd"][n / 10 % 10 ^ 1 && n % 10] || "th";
+        const name = (i) => scores[i] ? scores[i].player : "-";
+
+        let points, place;
+        for (const [i, score] of scores.entries()) {
+            if (score.player === '{{ .player }}') {
+                points = +score.score.toFixed(2);
+                place = i + 1;
+                break;
+            }
+        }
+
+        $("#lb-first").text(name(0));
+        $("#lb-second").text(name(1));
+        $("#lb-third").text(name(2));
+        $("#lb-points").text(`${points} point${points === 1 ? "" : "s"}`);
+        $("#lb-place").text(`(${place}${suffix(place)} place)`);
+    })(jQuery);
+</script>
+{{ end }}

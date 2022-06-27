@@ -64,7 +64,7 @@ func (p *Pool) Run() {
 			if gp == nil {
 				if player.IsAuthor {
 					gp = newGameplay(player.Game)
-					if gp.gameType == gameTypeWoC {
+					if gp.gameType == GameTypeWoC {
 						gp.Init(&Player{Name: wocPlayerMean})
 						gp.Init(&Player{Name: wocPlayerMedian})
 					}

@@ -419,7 +419,7 @@
 
         const $main = $("main");
         $main.on("keyup", "#form-enter-player", function() {
-            $("#form-enter :submit").prop("disabled", this.value === "");
+            $("#form-enter :submit").prop("disabled", !this.value);
         });
         $main.on("submit", "#form-enter", function(e) {
             e.preventDefault();

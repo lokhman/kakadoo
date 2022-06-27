@@ -126,7 +126,7 @@ func (gp *gameplay) calculateScores(task *Task) {
 		return
 	}
 
-	if gp.gameType == gameTypeQuiz {
+	if gp.gameType == GameTypeQuiz {
 		for player, answer := range answers {
 			scores := gp.scores[player]
 			if answer.answer == task.CorrectAnswer {
@@ -134,7 +134,7 @@ func (gp *gameplay) calculateScores(task *Task) {
 				scores[gp.currentTaskIndex] = baseScore + float64(gp.deadline.Sub(answer.time).Milliseconds())
 			}
 		}
-	} else if gp.gameType == gameTypeWoC {
+	} else if gp.gameType == GameTypeWoC {
 		correctAnswer, err := strconv.ParseFloat(task.CorrectAnswer, 64)
 		if err != nil {
 			panic(err)

@@ -70,6 +70,7 @@ func wireReader(pool *Pool, player *Player) {
 			switch wm.Type {
 			case wmtGameStarted:
 				numTasks := player.gameplay.Start()
+				UpdateGameStartedAt(player.Game, time.Now())
 				pool.broadcast <- &broadcastMessage{
 					Game: player.Game,
 					Message: &wireMessage{
