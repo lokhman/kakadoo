@@ -261,8 +261,8 @@
             },
             mousemove: function(e) {
                 const rect = $image.offset();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
+                const x = e.pageX - rect.left;
+                const y = e.pageY - rect.top;
                 $axeX.css("left", x);
                 $axeY.css("top", y);
                 $image.data("pin", [x, y]);
@@ -273,6 +273,7 @@
             click: function() {
                 const [x, y] = $image.data("pin");
                 $pin.css({left: x, top: y - 32}).show();
+                $axeX.add($axeY).hide();
                 $controlsImage.prop("src", $controlsImage.data("smile"));
                 $controls.removeClass("no-reset").fadeIn();
             }
