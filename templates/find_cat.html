@@ -56,12 +56,12 @@
     }
     #find-cat {
         height: inherit;
+        text-align: center;
     }
     #find-cat-container {
+        display: inline-block;
         position: relative;
-        width: fit-content;
         height: inherit;
-        margin: auto;
     }
     #find-cat-container img {
         width: 100%;
@@ -143,6 +143,17 @@
         opacity: 0.5;
         pointer-events: none;
     }
+    @media (max-width: 991.98px) {
+        #find-cat-controls {
+            opacity: 0.75;
+        }
+        #find-cat-controls form {
+            width: 170px;
+        }
+        #find-cat-controls-reset {
+            margin-bottom: 5px;
+        }
+    }
 </style>
 {{ end }}
 
@@ -182,7 +193,7 @@
         </div>
         <div id="find-cat-controls">
             <form method="POST">
-                <div class="text-center mb-4">
+                <div class="text-center mb-3">
                     <img src="/static/find-cat-smile.png" alt=""
                          data-smile="/static/find-cat-smile.png"
                          data-happy="/static/find-cat-happy.png"
@@ -248,7 +259,7 @@
                 $axeX.add($axeY).show();
             },
             mousemove: function(e) {
-                const rect = e.target.getBoundingClientRect();
+                const rect = $findCatImage.offset();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
                 $axeX.css("left", x);
@@ -266,8 +277,7 @@
             }
         });
         $("#find-cat-controls-reset").on("click", function() {
-            $pin.hide();
-            $findCatControls.hide();
+            $pin.add($findCatControls).hide();
         });
         $("form", $findCatControls).on("submit", function() {
             const [x, y] = $findCatImage.data("pin");

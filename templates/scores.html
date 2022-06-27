@@ -51,7 +51,7 @@
 
         setInterval(function() {
             {{ if .game.LastStartedAt }}
-                const startedAt = new Date("{{ .game.LastStartedAt.Format "2006-01-02T15:04:05" }}");
+                const startedAt = new Date("{{ .game.LastStartedAt.Format "2006-01-02T15:04:05Z" }}");
                 $timer.text(dtFormat.format(new Date() - startedAt));
             {{ end }}
             $tbody.load(`${window.location.href} table tbody > *`, function() {
