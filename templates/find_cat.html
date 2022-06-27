@@ -61,14 +61,10 @@
     #find-cat-container {
         display: inline-block;
         position: relative;
-        height: inherit;
     }
     #find-cat-container img {
-        width: 100%;
-        height: 100%;
+        max-width: 100%;
         max-height: 100%;
-        object-fit: contain;
-        object-position: top;
         cursor: pointer;
     }
     #find-cat-container .axe-x,
@@ -230,25 +226,28 @@
 {{ define "scripts" }}
 <script>
     (function($) {
+    {{ if eq .form.Player "" }}
         $("#form-enter-player").on("keyup", function() {
             $("#form-enter :submit").prop("disabled", !this.value);
         });
+    {{ else }}
+        const $findCat = $("#find-cat");
+        const $container = $("#find-cat-container");
+        const $controls = $("#find-cat-controls");
+        const $image = $("img", $container);
+        const $controlsImage = $("img", $controls);
+        const $reset = $("#find-cat-controls-reset");
+        const $axeX = $(".axe-x", $container);
+        const $axeY = $(".axe-y", $container);
+        const $pin = $(".pin", $container);
+        const $answer = $(".answer", $container);
 
-        const $findCatContainer = $("#find-cat-container");
-        const $findCatControls = $("#find-cat-controls");
-        const $findCatImage = $("img", $findCatContainer);
-        const $findCatControlsImage = $("img", $findCatControls);
-        const $axeX = $(".axe-x", $findCatContainer);
-        const $axeY = $(".axe-y", $findCatContainer);
-        const $pin = $(".pin", $findCatContainer);
-        const $answer = $(".answer", $findCatContainer);
-
-        const cacheImage = new Image();
-        cacheImage.src = $findCatImage.prop("src");
+        const cacheImage = new Image();  // .naturalWidth/.naturalHeight are not stable!
+        cacheImage.src = $image.prop("src");
 
         function getScaledXY(x, y, down) {
-            const width = $findCatImage.width();
-            const height = width * (cacheImage.height / cacheImage.width);  // don't rely on .height()
+            const width = $image.width();
+            const height = $image.height();
             if (down) {
                 return [x * width / cacheImage.width, y * height / cacheImage.height];
             } else {
@@ -256,45 +255,70 @@
             }
         }
 
-        $findCatImage.not("[data-answer]").on({
+        $image.not("[data-answer]").on({
             mouseenter: function() {
                 $axeX.add($axeY).show();
             },
             mousemove: function(e) {
-                const rect = $findCatImage.offset();
+                const rect = $image.offset();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
                 $axeX.css("left", x);
                 $axeY.css("top", y);
-                $findCatImage.data("pin", [x, y]);
+                $image.data("pin", [x, y]);
             },
             mouseleave: function() {
                 $axeX.add($axeY).hide();
             },
             click: function() {
-                const [x, y] = $findCatImage.data("pin");
+                const [x, y] = $image.data("pin");
                 $pin.css({left: x, top: y - 32}).show();
-                $findCatControlsImage.prop("src", $findCatControlsImage.data("smile"));
-                $findCatControls.removeClass("no-reset").fadeIn();
+                $controlsImage.prop("src", $controlsImage.data("smile"));
+                $controls.removeClass("no-reset").fadeIn();
             }
         });
-        $("#find-cat-controls-reset").on("click", function() {
-            $pin.add($findCatControls).hide();
+        $reset.on("click", function() {
+            $pin.add($controls).hide();
         });
-        $("form", $findCatControls).on("submit", function() {
-            const [x, y] = $findCatImage.data("pin");
+        $("form", $controls).on("submit", function() {
+            const [x, y] = $image.data("pin");
             const [naturalX, naturalY] = getScaledXY(x, y);
             const value = `${naturalX.toFixed()},${naturalY.toFixed()}`
             $("<input />", {attr: {type: "hidden", name: "v"}}).val(value).appendTo(this);
         });
 
+        function imageResize() {
+            const boxWidth = $findCat.width();
+            const boxHeight = $findCat.height();
+            const ratio = cacheImage.height / cacheImage.width;
+            const expWidth = boxHeight / ratio;
+            const expHeight = boxWidth * ratio;
+            if (expWidth <= boxWidth) {
+                $image.width(expWidth).height(boxHeight);
+            } else if (expHeight <= boxHeight) {
+                $image.width(boxWidth).height(expHeight);
+            }
+
+            if ($pin.is(":visible")) {
+                $reset.trigger("click");
+            }
+            if ($answer.is(":visible")) {
+                let [x1, y1, x2, y2] = $image.data("correct-answer");
+                [x1, y1] = getScaledXY(x1, y1, true);
+                [x2, y2] = getScaledXY(x2, y2, true);
+                $answer.css({left: x1, top: y1, width: x2 - x1, height: y2 - y1});
+            }
+        }
+
         cacheImage.onload = function() {
-            if (!$findCatImage.is("[data-answer]")) {
+            imageResize();
+
+            if (!$image.is("[data-answer]")) {
                 return;
             }
 
-            let [x, y] = $findCatImage.data("answer");
-            let [x1, y1, x2, y2] = $findCatImage.data("correct-answer");
+            let [x, y] = $image.data("answer");
+            let [x1, y1, x2, y2] = $image.data("correct-answer");
             const correct = x >= x1 && x <= x2 && y >= y1 && y <= y2;
             [x1, y1] = getScaledXY(x1, y1, true);
             [x2, y2] = getScaledXY(x2, y2, true);
@@ -305,14 +329,15 @@
                 height: y2 - y1,
                 borderColor: correct ? "#0f0" : "#f00"
             }).show();
-            $findCatControlsImage.prop("src",
-                correct ? $findCatControlsImage.data("happy") : $findCatControlsImage.data("sad"));
-            $findCatControls.addClass("no-reset").show();
+            $controlsImage.prop("src",
+                correct ? $controlsImage.data("happy") : $controlsImage.data("sad"));
+            $controls.addClass("no-reset").show();
         };
 
         $(window).on("resize", function() {
-            $pin.add($answer).hide();  // lazy messing with math
+            imageResize();
         });
+    {{ end }}
     })(jQuery);
 </script>
 {{ end }}
