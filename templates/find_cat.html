@@ -242,15 +242,16 @@
         const $pin = $(".pin", $findCatContainer);
         const $answer = $(".answer", $findCatContainer);
 
+        const cacheImage = new Image();
+        cacheImage.src = $findCatImage.prop("src");
+
         function getScaledXY(x, y, down) {
             const width = $findCatImage.width();
             const height = $findCatImage.height();
-            const naturalWidth = $findCatImage.prop("naturalWidth");
-            const naturalHeight = $findCatImage.prop("naturalHeight");
             if (down) {
-                return [x * width / naturalWidth, y * height / naturalHeight];
+                return [x * width / cacheImage.width, y * height / cacheImage.height];
             } else {
-                return [x * naturalWidth / width, y * naturalHeight / height];
+                return [x * cacheImage.width / width, y * cacheImage.height / height];
             }
         }
 
@@ -286,7 +287,11 @@
             $("<input />", {attr: {type: "hidden", name: "v"}}).val(value).appendTo(this);
         });
 
-        $findCatImage.filter("[data-answer]").one("load", function() {
+        cacheImage.onload = function() {
+            if (!$findCatImage.is("[data-answer]")) {
+                return;
+            }
+
             let [x, y] = $findCatImage.data("answer");
             let [x1, y1, x2, y2] = $findCatImage.data("correct-answer");
             const correct = x >= x1 && x <= x2 && y >= y1 && y <= y2;
@@ -302,11 +307,7 @@
             $findCatControlsImage.prop("src",
                 correct ? $findCatControlsImage.data("happy") : $findCatControlsImage.data("sad"));
             $findCatControls.addClass("no-reset").show();
-        }).each(function() {
-            if (this.complete) {
-                $findCatImage.trigger("load");
-            }
-        });
+        };
 
         $(window).on("resize", function() {
             $pin.add($answer).hide();  // lazy messing with math
