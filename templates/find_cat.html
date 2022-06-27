@@ -247,7 +247,7 @@
 
         function getScaledXY(x, y, down) {
             const width = $findCatImage.width();
-            const height = $findCatImage.height();
+            const height = width * (cacheImage.height / cacheImage.width);  // don't rely on .height()
             if (down) {
                 return [x * width / cacheImage.width, y * height / cacheImage.height];
             } else {
