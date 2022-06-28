@@ -3,19 +3,12 @@ package app
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
 )
-
-var findCatPlayers = struct {
-	playerKeys map[string]string
-	mu         sync.Mutex
-}{
-	playerKeys: make(map[string]string),
-}
 
 type findCatForm struct {
 	Player  string   `form:"p"`
@@ -47,17 +40,6 @@ func FindCat(c *gin.Context) {
 			return
 		}
 
-		// findCatPlayers.mu.Lock()
-		// defer findCatPlayers.mu.Unlock()
-		// if key, ok := findCatPlayers.playerKeys[player]; ok && key != form.Key {
-		// 	c.Redirect(http.StatusTemporaryRedirect, c.Request.URL.Path+"?ep=1")
-		// 	c.Abort()
-		// 	return
-		// } else if !ok {
-		// 	findCatPlayers.playerKeys[player] = form.Key
-		// 	UpdateGameStartedAt(game, time.Now(), false)
-		// }
-
 		if HasPlayerInScores(game, player, form.Key) {
 			c.Redirect(http.StatusTemporaryRedirect, c.Request.URL.Path+"?ep=1")
 			c.Abort()
@@ -79,12 +61,23 @@ func FindCat(c *gin.Context) {
 			answer := strings.Split(form.Answer, ",")
 			correctAnswer := strings.Split(task.CorrectAnswer, ",")
 			if len(answer) == 2 && len(correctAnswer) == 4 {
-				x, y := answer[0], answer[1]
-				x1, y1, x2, y2 := correctAnswer[0], correctAnswer[1], correctAnswer[2], correctAnswer[3]
+				var x, y, x1, y1, x2, y2 int
+				var err error
+				if x, err = strconv.Atoi(answer[0]); err != nil {
+					goto score
+				}
+				if y, err = strconv.Atoi(answer[1]); err != nil {
+					goto score
+				}
+				x1, _ = strconv.Atoi(correctAnswer[0])
+				y1, _ = strconv.Atoi(correctAnswer[1])
+				x2, _ = strconv.Atoi(correctAnswer[2])
+				y2, _ = strconv.Atoi(correctAnswer[3])
 				if x >= x1 && x <= x2 && y >= y1 && y <= y2 {
 					score = 1
 				}
 			}
+		score:
 			InsertScores(&Score{
 				Game:      game,
 				Task:      task,
