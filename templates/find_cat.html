@@ -210,12 +210,7 @@
                         </div>
                     </div>
                 </div>
-                {{ range $answer := .form.Answers }}
-                    <input type="hidden" name="w" value="{{ $answer }}">
-                {{ end }}
-                {{ if ne .form.Answer "" }}
-                    <input type="hidden" name="w" value="{{ .form.Answer }}">
-                {{ end }}
+                <input type="hidden" name="w" value="{{ .form.Index }}">
             </form>
         </div>
         <div id="find-cat-counter">{{ .counter }}</div>
@@ -282,10 +277,12 @@
             $pin.add($controls).hide();
         });
         $("form", $controls).on("submit", function() {
-            const [x, y] = $image.data("pin");
-            const [naturalX, naturalY] = getScaledXY(x, y);
-            const value = `${naturalX.toFixed()},${naturalY.toFixed()}`
-            $("<input />", {attr: {type: "hidden", name: "v"}}).val(value).appendTo(this);
+            const pin = $image.data("pin");
+            if (pin !== undefined) {
+                const [naturalX, naturalY] = getScaledXY(pin[0], pin[1]);
+                const value = `${naturalX.toFixed()},${naturalY.toFixed()}`
+                $("<input />", {attr: {type: "hidden", name: "v"}, value}).appendTo(this);
+            }
         });
 
         function imageResize() {

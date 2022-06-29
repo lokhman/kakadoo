@@ -11,12 +11,11 @@ import (
 )
 
 type findCatForm struct {
-	Player  string   `form:"p"`
-	Key     string   `form:"k"`
-	Answer  string   `form:"v"`
-	Answers []string `form:"w"`
-
-	ErrorPlayer bool `form:"ep"`
+	Player      string `form:"p"`
+	Key         string `form:"k"`
+	Index       int    `form:"w"`
+	Answer      string `form:"v"`
+	ErrorPlayer bool   `form:"ep"`
 }
 
 func FindCat(c *gin.Context) {
@@ -49,14 +48,17 @@ func FindCat(c *gin.Context) {
 			UpdateGameStartedAt(game, time.Now())
 		}
 
-		index = len(form.Answers)
-		if index >= len(tasks) {
+		if index = form.Index; index < 0 {
+			index = 0
+		} else if index >= len(tasks) {
 			c.HTML(http.StatusOK, "podium", gin.H{"scores": GetScores(game), "player": player})
 			return
 		}
 		task = tasks[index]
 
 		if form.Answer != "" {
+			form.Index++
+
 			var score float64
 			answer := strings.Split(form.Answer, ",")
 			correctAnswer := strings.Split(task.CorrectAnswer, ",")

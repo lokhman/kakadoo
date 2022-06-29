@@ -128,13 +128,27 @@ type Score struct {
 }
 
 func InsertScores(scores ...*Score) {
-	q := QB.Insert("scores").
+	qi := QB.Insert("scores").
 		Columns("game_id", "task_id", "player", "player_key", "question", "answer", "score", "created_at")
+	any := false
 	for _, sc := range scores {
-		q = q.Values(sc.Game.ID, sc.Task.ID, sc.Player, sc.PlayerKey, sc.Question, sc.Answer, sc.Score, sc.CreatedAt)
+		var exists bool
+		qs := QB.Select("s.id").Prefix("SELECT EXISTS(").From("scores s").Join("games g ON s.game_id = g.id").
+			Where("s.game_id = ? AND s.player = ? AND s.player_key = ? AND task_id = ? AND "+
+				"s.created_at >= g.last_started_at", sc.Game.ID, sc.Player, sc.PlayerKey, sc.Task.ID).Suffix(")")
+		if err := qs.Scan(&exists); err != nil {
+			panic(err)
+		}
+		if !exists {
+			qi = qi.Values(sc.Game.ID, sc.Task.ID, sc.Player, sc.PlayerKey, sc.Question, sc.Answer, sc.Score,
+				sc.CreatedAt)
+			any = true
+		}
 	}
-	if _, err := q.Exec(); err != nil {
-		panic(err)
+	if any {
+		if _, err := qi.Exec(); err != nil {
+			panic(err)
+		}
 	}
 }
 
@@ -165,12 +179,12 @@ func GetScores(game *Game) []_dbScore {
 }
 
 func HasPlayerInScores(game *Game, player string, playerKey string) bool {
-	var result bool
+	var exists bool
 	q := QB.Select("s.id").Prefix("SELECT EXISTS(").From("scores s").Join("games g ON s.game_id = g.id").
 		Where("s.game_id = ? AND s.player = ? AND s.player_key <> ?", game.ID, player, playerKey).
 		Where("s.created_at >= g.last_started_at").Suffix(")")
-	if err := q.Scan(&result); err != nil {
+	if err := q.Scan(&exists); err != nil {
 		panic(err)
 	}
-	return result
+	return exists
 }
